@@ -65,6 +65,9 @@ All plugins are fetched from their original authors' marketplaces — nothing is
 | 🪨 [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) | Cuts ~75% of output tokens — same accuracy, way fewer words |
 | ✨ [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | Structured planning and workflow methodology |
 | 🔧 [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | `/simplify` command — refactor messy code |
+| ☕ [double-shot-latte](https://github.com/obra/double-shot-latte) | [@obra](https://github.com/obra) | Zero-interruption mode — automatically continues working |
+| 🚀 [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | [@HKUDS](https://github.com/HKUDS) | "CLI over MCP" — 30x token savings via lean harnesses |
+| ✂️ [RTK](https://github.com/rtk-ai/rtk) | [@rtk-ai](https://github.com/rtk-ai) | Rust Token Killer — prune 60-90% of output noise |
 | 🎯 [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) | Disciplined coding: think first, surgical changes, no over-engineering |
 
 ## Installation
@@ -107,6 +110,7 @@ Run these commands **inside Claude Code**:
 /plugin marketplace add obra/superpowers-marketplace
 /plugin install superpowers@superpowers-marketplace
 /plugin install code-simplifier@superpowers-marketplace
+/plugin install double-shot-latte@superpowers-marketplace
 /reload-plugins
 ```
 
@@ -185,6 +189,9 @@ This plugin integrates and automates setup for the following excellent community
 | [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) (Julius Brussee) | MIT |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
 | [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
+| [double-shot-latte](https://github.com/obra/double-shot-latte) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
+| [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | [@HKUDS](https://github.com/HKUDS) | Apache-2.0 |
+| [RTK](https://github.com/rtk-ai/rtk) | [@rtk-ai](https://github.com/rtk-ai) | MIT |
 | [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) (Forrest Chang) | See repo |
 
 > See [CREDITS.md](CREDITS.md) for full attribution with repository links, license details, and how each tool is used.

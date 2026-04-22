@@ -13,8 +13,9 @@
 5. [Real-World Usage Scenarios](#5-real-world-usage-scenarios)
 6. [The Status Bar Explained](#6-the-status-bar-explained)
 7. [Asking Claude the Right Way](#7-asking-claude-the-right-way)
-8. [Troubleshooting](#8-troubleshooting)
-9. [Credits](#9-credits)
+17. [Tips & Tricks](#17-tips--tricks)
+18. [Troubleshooting](#18-troubleshooting)
+19. [Credits](#19-credits)
 
 ---
 
@@ -59,13 +60,17 @@ cd claude-code-power-pack
 
 ### Step 2 — Run the setup script
 ```bash
-node setup.js
+node setup.js --register-hooks
 ```
 
 This single command:
 - Registers the Sequential Thinking and Context7 MCP servers
 - Configures the ccstatusline terminal HUD
-- Installs Caveman, Superpowers, code-simplifier, and Karpathy Skills from their official marketplaces
+- Installs Caveman, Superpowers, code-simplifier, Karpathy Skills, and double-shot-latte from their official marketplaces
+- **Automatically registers hooks** in your project's `.claude/settings.json` (if `--register-hooks` is used)
+
+> [!NOTE]
+> If you use `--register-hooks`, you still need to copy the `hooks/` and `agents/` directories to your `.claude/` folder as shown in Step 3.
 
 > **Preview first?** Run `node setup.js --dry-run` to see exactly what it would do without changing anything.
 
@@ -78,12 +83,13 @@ claude --plugin-dir /path/to/claude-code-power-pack
 
 **Option B: Per project** — copy into your project's `.claude/` folder:
 ```bash
-cp -r agents .claude/agents
-cp -r skills .claude/skills
-cp -r hooks  .claude/hooks
+mkdir -p .claude/hooks
+mkdir -p .claude/agents
+cp agents/* .claude/agents/
+cp hooks/* .claude/hooks/
 ```
 
-Then create or update `.claude/settings.json`:
+If you didn't use `node setup.js --register-hooks`, you'll need to manually update `.claude/settings.json`:
 ```json
 {
   "hooks": {
@@ -298,6 +304,16 @@ Run it before committing, before code review, or whenever a file starts feeling 
 
 ---
 
+### ☕ double-shot-latte (Plugin — Zero Interruptions)
+
+**What it does:** Claude Code often stops to ask "Would you like me to continue?" or "Should I proceed with the next file?". This plugin uses a secondary evaluation loop to automatically decide if it should continue working on the task you gave it.
+
+**Why it matters:** It turns "Semi-Auto" mode into "Full-Auto" mode. You can walk away for a coffee and come back to a finished feature instead of a "Continue?" prompt.
+
+**How to use it:** It works automatically in the background. If you want to force Claude to stop, you can still use `Ctrl+C`.
+
+---
+
 ## 5. Real-World Usage Scenarios
 
 ### Scenario A: Starting a New Feature
@@ -471,7 +487,39 @@ Opens an interactive TUI to pick themes, reorder widgets, change colors.
 
 ---
 
-## 8. Troubleshooting
+## 🗑️ The Zero-Waste Stack (Token Efficiency)
+
+One of the biggest challenges in AI-assisted coding is "token bloat." Raw CLI output and verbose MCP integrations can quickly exhaust your context window. The Power Pack solves this with a multi-layered approach:
+
+### 1. CLI over MCP (CLI-Anything)
+While MCP is powerful, it often requires loading large tool schemas into the context. **CLI-Anything** advocates for a leaner approach: use specialized CLI harnesses that communicate in a concise, stateful way.
+- **Benefit:** Up to 30x fewer tokens vs. equivalent MCP servers.
+- **Usage:** Install the plugin, then use `/cli-anything <repo>` to build a harness. Use `npx skills add HKUDS/CLI-Anything --skill <name>` to add pre-built agent guidelines.
+
+### 2. Output Pruning (RTK)
+**RTK (Rust Token Killer)** acts as a transparent proxy that sits between Claude and your shell. It intercepts command output and prunes noise (like `npm install` progress bars, boilerplate logs, and redundant whitespace) before it reaches the model.
+- **Benefit:** 60-90% token savings on common developer commands.
+- **Setup:** Download the binary from [rtk-ai/rtk](https://github.com/rtk-ai/rtk) and run `rtk init --global`.
+
+### 3. Concise Communication (Caveman)
+The **Caveman** plugin enforces a "less is more" rule for Claude's own responses. By stripping away polite filler and conversational fluff, you save hundreds of tokens per turn without losing accuracy.
+
+---
+
+## 17. Tips & Tricks
+
+### The "Auto-Mode" Stack
+For the best automated experience, ensure you have **double-shot-latte** and **Karpathy Skills** enabled. This combination keeps Claude working autonomously while ensuring it stays disciplined and doesn't wander off-task.
+
+### Combine /caveman and /compact
+If you are in a very long session, use `/caveman ultra` to minimize future token usage, then run `/compact` to summarize what's already happened. This "resets" your context window with the most efficient possible baseline.
+
+### Model-Specific Delegation
+Don't wait for the router to suggest a model if you already know the task is complex. Starting a prompt with _"Using your opus-heavy agent, refactor..."_ ensures the right level of "brainpower" is applied from the very first turn.
+
+---
+
+## 18. Troubleshooting
 
 ### "MCP server not found" / Context7 not working
 Run `node setup.js` again. Make sure Node.js is installed. The servers download via `npx` on first use — this requires internet access.

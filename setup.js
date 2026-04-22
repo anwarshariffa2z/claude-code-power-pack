@@ -89,6 +89,12 @@ const PLUGIN_MARKETPLACES = [
         installCmd: 'claude plugin install code-simplifier@superpowers-marketplace',
         description: 'Refactoring agent — /simplify command to clean up complex or messy code',
         credit: 'Jesse Vincent (@obra) — https://github.com/obra/superpowers-marketplace'
+      },
+      {
+        name: 'double-shot-latte',
+        installCmd: 'claude plugin install double-shot-latte@superpowers-marketplace',
+        description: '☕ Zero-interruption mode — automatically evaluates whether Claude should continue working',
+        credit: 'Jesse Vincent (@obra) — https://github.com/obra/superpowers-marketplace'
       }
     ]
   },
@@ -110,10 +116,11 @@ const PLUGIN_MARKETPLACES = [
 // ── CLI Flags ───────────────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
-const DRY_RUN        = args.includes('--dry-run');
-const SKIP_MCP       = args.includes('--skip-mcp');
+const DRY_RUN         = args.includes('--dry-run');
+const SKIP_MCP        = args.includes('--skip-mcp');
 const SKIP_STATUSLINE = args.includes('--skip-statusline');
-const SKIP_PLUGINS   = args.includes('--skip-plugins');
+const SKIP_PLUGINS    = args.includes('--skip-plugins');
+const REGISTER_HOOKS  = args.includes('--register-hooks');
 
 // ── Colour helpers ──────────────────────────────────────────────────────────
 
@@ -124,6 +131,7 @@ const cyan   = t => c('36', t);
 const red    = t => c('31', t);
 const bold   = t => c('1',  t);
 const dim    = t => c('2',  t);
+const magenta = t => c('35', t);
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -266,6 +274,125 @@ function setupPlugins() {
   }
 }
 
+// ── Step 4: Hook Registration ───────────────────────────────────────────────
+
+function setupHooks() {
+  console.log(bold('Step 4: Hook Registration (Local Project)'));
+  console.log(dim('  Registers context tracker and model router in .claude/settings.json.'));
+  console.log('');
+
+  if (!REGISTER_HOOKS) {
+    console.log(dim('  ⏭ Skipped (use --register-hooks to automate this step)'));
+    console.log('');
+    return;
+  }
+
+  const localSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
+  const localSettingsDir = path.dirname(localSettingsPath);
+
+  if (DRY_RUN) {
+    console.log(cyan(`  [DRY RUN] Would write hook config to: ${localSettingsPath}`));
+    console.log('');
+    return;
+  }
+
+  if (!fs.existsSync(localSettingsDir)) fs.mkdirSync(localSettingsDir, { recursive: true });
+
+  const existing = loadSettings(localSettingsPath);
+  
+  const HOOK_CONFIG = {
+    hooks: {
+      SessionStart:     [{ hooks: [{ type: 'command', command: 'node .claude/hooks/session-start.js' }] }],
+      UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'node .claude/hooks/router.js' }] }],
+      PostToolUse:      [{ hooks: [{ type: 'command', command: 'node .claude/hooks/context-tracker.js' }] }],
+      Stop:             [{ hooks: [{ type: 'command', command: 'node .claude/hooks/stop-guard.js' }] }]
+    }
+  };
+
+  const merged = { ...existing, ...HOOK_CONFIG };
+  fs.writeFileSync(localSettingsPath, JSON.stringify(merged, null, 2), 'utf8');
+
+  console.log(green('  ✔ Hooks registered in ' + localSettingsPath));
+  console.log(dim('  ⚠ Ensure you have copied the hooks/ directory to .claude/hooks/'));
+  console.log('');
+}
+
+// ── Step 5: Advanced Token Efficiency ────────────────────────────────────────
+
+function setupTokenEfficiency() {
+  console.log(bold('Step 5: Advanced Token Efficiency (Optional)'));
+  console.log(dim('  Maximize context by pruning noise and using lean CLI harnesses.'));
+  console.log('');
+
+  // CLI-Anything
+  console.log(magenta('  ── CLI-Anything (HKUDS/CLI-Anything) ──'));
+  console.log(dim('  "CLI over MCP" — provides lean harnesses for complex apps (GIMP, Blender, etc.)'));
+  console.log(dim('  Saves up to 30x tokens vs. verbose MCP servers.'));
+  console.log('');
+
+  const pluginPath = path.join(os.homedir(), '.claude', 'plugins', 'cli-anything');
+  if (fs.existsSync(pluginPath)) {
+    console.log(green('  ✔ CLI-Anything plugin detected at ' + pluginPath));
+  } else {
+    console.log(yellow('  ⚠ CLI-Anything not found. To install:'));
+    console.log(dim('    git clone https://github.com/HKUDS/CLI-Anything.git ' + pluginPath));
+  }
+  console.log('');
+
+  // RTK
+  console.log(magenta('  ── RTK (Rust Token Killer) ──'));
+  console.log(dim('  Transparent CLI proxy that prunes 60-90% of output noise (logs, progress bars).'));
+  console.log('');
+
+  try {
+    execSync('rtk --version', { stdio: 'ignore' });
+    console.log(green('  ✔ RTK detected in PATH'));
+  } catch (e) {
+    console.log(yellow('  ⚠ RTK not found. Highly recommended for token savings:'));
+    console.log(dim('    Download binary: https://github.com/rtk-ai/rtk'));
+    console.log(dim('    Initialize: rtk init --global'));
+  }
+  console.log('');
+}
+
+// ── Prerequisite Checks ─────────────────────────────────────────────────────
+
+function checkPrerequisites() {
+  console.log(bold('Checking Prerequisites...'));
+  
+  // Node version check
+  const nodeVersion = process.versions.node.split('.')[0];
+  if (parseInt(nodeVersion) < 16) {
+    console.log(red(`  ✘ Node.js v${nodeVersion} detected. v16+ is required.`));
+    process.exit(1);
+  }
+  console.log(green(`  ✔ Node.js v${process.versions.node}`));
+
+  // Python check for CLI-Anything
+  try {
+    const pythonVersion = execSync('python --version', { encoding: 'utf8' }).trim();
+    console.log(green(`  ✔ ${pythonVersion} (required for CLI-Anything)`));
+  } catch (e) {
+    try {
+        const python3Version = execSync('python3 --version', { encoding: 'utf8' }).trim();
+        console.log(green(`  ✔ ${python3Version} (required for CLI-Anything)`));
+    } catch (e2) {
+        console.log(yellow('  ⚠ Python not found. CLI-Anything requires Python 3.10+.'));
+    }
+  }
+
+  // Claude CLI check
+  try {
+    const version = execSync('claude --version', { encoding: 'utf8' }).trim();
+    console.log(green(`  ✔ ${version}`));
+  } catch (e) {
+    console.log(red('  ✘ Claude Code CLI not found. Please install it first.'));
+    console.log(dim('    https://docs.anthropic.com/en/docs/claude-code/overview'));
+    process.exit(1);
+  }
+  console.log('');
+}
+
 // ── Summary ─────────────────────────────────────────────────────────────────
 
 function printSummary() {
@@ -282,6 +409,8 @@ function printSummary() {
   console.log(green('    ✔') + ' Superpowers — structured planning (by @obra)');
   console.log(green('    ✔') + ' code-simplifier — /simplify refactor (by @obra)');
   console.log(green('    ✔') + ' Karpathy Skills — disciplined coding guidelines (by @forrestchang)');
+  console.log(green('    ✔') + ' CLI-Anything discovery — lean agent harnesses (by @HKUDS)');
+  console.log(green('    ✔') + ' RTK pruning — up to 90% token savings (by @rtk-ai)');
   console.log('');
   console.log(dim('  See CREDITS.md for full attribution of all third-party tools.'));
   console.log(bold('════════════════════════════════════════════════════════════════'));
@@ -294,9 +423,13 @@ async function main() {
   printHeader();
   if (DRY_RUN) console.log(yellow('  🔍 DRY RUN MODE — no changes will be made\n'));
 
+  checkPrerequisites();
+
   setupMCPServers();
   setupStatusLine();
   setupPlugins();
+  setupHooks();
+  setupTokenEfficiency();
   printSummary();
 }
 

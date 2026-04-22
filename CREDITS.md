@@ -73,6 +73,16 @@ sources — no third-party code is bundled or redistributed here.
 
 ---
 
+### double-shot-latte
+> ☕ Zero-interruption mode — automatically evaluates whether Claude should continue working
+
+- **Author:** Jesse Vincent ([@obra](https://github.com/obra))
+- **Repository:** https://github.com/obra/double-shot-latte
+- **License:** See repository
+- **How we use it:** Installed via `claude plugin install double-shot-latte@superpowers-marketplace` to reduce "Would you like me to continue?" prompts.
+
+---
+
 ### Andrej Karpathy Skills
 > Disciplined AI-assisted coding principles: think before coding, simplicity first, surgical changes, goal-driven execution
 
@@ -97,6 +107,26 @@ sources — no third-party code is bundled or redistributed here.
 - **Website:** https://modelcontextprotocol.io
 - **Repository:** https://github.com/modelcontextprotocol
 - **License:** MIT
+
+---
+
+### RTK (Rust Token Killer)
+> ✂️ High-performance CLI proxy to prune 60-90% of output noise
+
+- **Author:** [RTK AI Team](https://github.com/rtk-ai)
+- **Repository:** https://github.com/rtk-ai/rtk
+- **License:** MIT
+- **How we use it:** Acts as a transparent proxy between Claude and the shell to maximize context efficiency.
+
+---
+
+### CLI-Anything
+> 🚀 "CLI over MCP" — Making all software agent-native with lean harnesses
+
+- **Author:** [HKUDS Lab](https://github.com/HKUDS)
+- **Repository:** https://github.com/HKUDS/CLI-Anything
+- **License:** Apache-2.0
+- **How we use it:** Provides high-efficiency CLI harnesses for complex applications to save up to 30x tokens vs. verbose MCP integrations.
 
 ---
 
