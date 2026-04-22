@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Setup Script — Claude Code Power Pack v2.1
+ * Setup Script — Claude Code Power Pack v2.2.0
  *
  * Automates the full companion tool configuration:
  * 1. Registers MCP servers via `claude mcp add` CLI (Sequential Thinking, Context7)
@@ -138,7 +138,7 @@ const magenta = t => c('35', t);
 function printHeader() {
   console.log('');
   console.log(bold('╔══════════════════════════════════════════════════════════════╗'));
-  console.log(bold('║         Claude Code Power Pack — Setup v2.1                ║'));
+  console.log(bold('║         Claude Code Power Pack — Setup v2.2.0              ║'));
   console.log(bold('╚══════════════════════════════════════════════════════════════╝'));
   console.log('');
   console.log(dim('  All plugins are installed from their original authors\' marketplaces.'));
