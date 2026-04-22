@@ -18,6 +18,8 @@
  * Usage:
  *   node setup.js              — Full setup
  *   node setup.js --dry-run    — Preview without making changes
+ *   node setup.js --global-hooks     — Register hooks & agents globally (available in all projects)
+ *   node setup.js --register-hooks   — Register hooks & agents locally (this project only)
  *   node setup.js --skip-mcp         — Skip MCP server registration
  *   node setup.js --skip-statusline  — Skip ccstatusline config
  *   node setup.js --skip-plugins     — Skip plugin install instructions
@@ -42,17 +44,21 @@ const STATUSLINE_CONFIG = {
 
 // MCP servers registered via `claude mcp add` CLI — installed to user-level settings.
 // These run npx on first use (no pre-install needed), free tier.
+// On Windows, we must wrap npx with 'cmd /c' to avoid Claude Code warnings.
+const IS_WINDOWS = process.platform === 'win32';
+const NPX_WRAPPER = IS_WINDOWS ? 'cmd /c ' : '';
+
 const MCP_SERVERS = [
   {
     name: 'sequential-thinking',
     description: 'Structured step-by-step reasoning for complex multi-part problems',
-    command: 'claude mcp add sequential-thinking -s user -- npx -y @modelcontextprotocol/server-sequential-thinking',
+    command: `claude mcp add sequential-thinking -s user -- ${NPX_WRAPPER}npx -y @modelcontextprotocol/server-sequential-thinking`,
     credit: 'Anthropic / MCP team — https://github.com/modelcontextprotocol/servers'
   },
   {
     name: 'context7',
     description: 'Live, version-specific library documentation (free tier)',
-    command: 'claude mcp add context7 -s user -- npx -y @upstash/context7-mcp@latest',
+    command: `claude mcp add context7 -s user -- ${NPX_WRAPPER}npx -y @upstash/context7-mcp@latest`,
     credit: 'Upstash — https://github.com/upstash/context7'
   }
 ];
@@ -109,12 +115,12 @@ const PLUGIN_MARKETPLACES = [
 
 // ── CLI Flags ───────────────────────────────────────────────────────────────
 
-const args = process.argv.slice(2);
-const DRY_RUN         = args.includes('--dry-run');
-const SKIP_MCP        = args.includes('--skip-mcp');
-const SKIP_STATUSLINE = args.includes('--skip-statusline');
-const SKIP_PLUGINS    = args.includes('--skip-plugins');
-const REGISTER_HOOKS  = args.includes('--register-hooks');
+const REGISTER_HOOKS = process.argv.includes('--register-hooks');
+const GLOBAL_HOOKS = process.argv.includes('--global-hooks');
+const DRY_RUN = process.argv.includes('--dry-run');
+const SKIP_MCP        = process.argv.includes('--skip-mcp');
+const SKIP_STATUSLINE = process.argv.includes('--skip-statusline');
+const SKIP_PLUGINS    = process.argv.includes('--skip-plugins');
 
 // ── Colour helpers ──────────────────────────────────────────────────────────
 
@@ -189,8 +195,13 @@ function setupMCPServers() {
   }
 
   for (const server of MCP_SERVERS) {
-    runCmd(server.command, `${server.name} — ${server.description}`);
-    if (!DRY_RUN) console.log(dim(`    Credit: ${server.credit}`));
+    const success = runCmd(server.command, `${server.name} — ${server.description}`);
+    if (!success && IS_WINDOWS && !DRY_RUN) {
+      console.log(yellow(`    💡 Windows Fix: If you see warnings in /doctor, try running:`));
+      console.log(dim(`       claude mcp remove ${server.name} -s user`));
+      console.log(dim(`       ${server.command}`));
+    }
+    if (success && !DRY_RUN) console.log(dim(`    Credit: ${server.credit}`));
   }
 
   console.log('');
@@ -268,46 +279,76 @@ function setupPlugins() {
   }
 }
 
-// ── Step 4: Hook Registration ───────────────────────────────────────────────
-
 function setupHooks() {
-  console.log(bold('Step 4: Hook Registration (Local Project)'));
-  console.log(dim('  Registers context tracker and model router in .claude/settings.json.'));
+  console.log(bold('Step 4: Hook Registration'));
+  
+  if (GLOBAL_HOOKS) {
+    console.log(dim('  Registers context tracker and model router globally in ~/.claude/settings.json.'));
+  } else {
+    console.log(dim('  Registers context tracker and model router locally in .claude/settings.json.'));
+  }
   console.log('');
 
-  if (!REGISTER_HOOKS) {
-    console.log(dim('  ⏭ Skipped (use --register-hooks to automate this step)'));
+  if (!REGISTER_HOOKS && !GLOBAL_HOOKS) {
+    console.log(dim('  ⏭ Skipped (use --global-hooks or --register-hooks to automate this step)'));
     console.log('');
     return;
   }
 
+  const userSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');
   const localSettingsPath = path.join(process.cwd(), '.claude', 'settings.json');
-  const localSettingsDir = path.dirname(localSettingsPath);
+  
+  const settingsPath = GLOBAL_HOOKS ? userSettingsPath : localSettingsPath;
+  const settingsDir = path.dirname(settingsPath);
+  const targetHooksDir = path.join(settingsDir, 'hooks');
+  const targetAgentsDir = path.join(settingsDir, 'agents');
 
   if (DRY_RUN) {
-    console.log(cyan(`  [DRY RUN] Would write hook config to: ${localSettingsPath}`));
+    console.log(cyan(`  [DRY RUN] Would write hook config to: ${settingsPath}`));
     console.log('');
     return;
   }
 
-  if (!fs.existsSync(localSettingsDir)) fs.mkdirSync(localSettingsDir, { recursive: true });
+  if (!fs.existsSync(settingsDir)) fs.mkdirSync(settingsDir, { recursive: true });
 
-  const existing = loadSettings(localSettingsPath);
+  const existing = loadSettings(settingsPath);
+  
+  // Use absolute paths for global hooks, relative for local
+  const hooksBase = GLOBAL_HOOKS ? __dirname : '.';
   
   const HOOK_CONFIG = {
     hooks: {
-      SessionStart:     [{ hooks: [{ type: 'command', command: 'node .claude/hooks/session-start.js' }] }],
-      UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'node .claude/hooks/router.js' }] }],
-      PostToolUse:      [{ hooks: [{ type: 'command', command: 'node .claude/hooks/context-tracker.js' }] }],
-      Stop:             [{ hooks: [{ type: 'command', command: 'node .claude/hooks/stop-guard.js' }] }]
+      SessionStart:     [{ hooks: [{ type: 'command', command: `node "${path.join(hooksBase, 'hooks', 'session-start.js')}"` }] }],
+      UserPromptSubmit: [{ hooks: [{ type: 'command', command: `node "${path.join(hooksBase, 'hooks', 'router.js')}"` }] }],
+      PostToolUse:      [{ hooks: [{ type: 'command', command: `node "${path.join(hooksBase, 'hooks', 'context-tracker.js')}"` }] }],
+      Stop:             [{ hooks: [{ type: 'command', command: `node "${path.join(hooksBase, 'hooks', 'stop-guard.js')}"` }] }]
     }
   };
 
   const merged = { ...existing, ...HOOK_CONFIG };
-  fs.writeFileSync(localSettingsPath, JSON.stringify(merged, null, 2), 'utf8');
+  fs.writeFileSync(settingsPath, JSON.stringify(merged, null, 2), 'utf8');
 
-  console.log(green('  ✔ Hooks registered in ' + localSettingsPath));
-  console.log(dim('  ⚠ Ensure you have copied the hooks/ directory to .claude/hooks/'));
+  console.log(green('  ✔ Hooks registered in ' + settingsPath));
+
+  // Copy agents/ directory (Hooks are called via absolute path in global mode, no need to copy them)
+  // But we copy agents to ~/.claude/agents so Claude Code can discover them globally.
+  const sourceDir = __dirname;
+  const dirsToCopy = GLOBAL_HOOKS ? ['agents'] : ['hooks', 'agents'];
+
+  for (const dir of dirsToCopy) {
+    const src = path.join(sourceDir, dir);
+    const dest = path.join(settingsDir, dir);
+
+    if (fs.existsSync(src)) {
+      if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+      
+      const files = fs.readdirSync(src);
+      for (const file of files) {
+        fs.copyFileSync(path.join(src, file), path.join(dest, file));
+      }
+      console.log(green(`  ✔ Copied ${dir}/ to ${GLOBAL_HOOKS ? 'global ~/.claude/' : 'project .claude/'}${dir}/`));
+    }
+  }
   console.log('');
 }
 

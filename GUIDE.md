@@ -60,6 +60,10 @@ cd claude-code-power-pack
 
 ### Step 2 — Run the setup script
 ```bash
+# Option A: Global (Recommended) — available in every project
+node setup.js --global-hooks
+
+# Option B: Local — this project only
 node setup.js --register-hooks
 ```
 
@@ -438,16 +442,28 @@ Opens an interactive TUI to pick themes, reorder widgets, change colors.
 
 ---
 
-## 7. Asking Claude the Right Way
+## 7. Triggering Models & Agents
 
-### Trigger model routing intentionally
+The Power Pack's **Model Router** automatically analyzes your prompts to recommend the best model tier.
 
-| You want Opus | You want Haiku |
-|---------------|----------------|
-| "Refactor the entire X" | "Fix the typo in X" |
-| "Architect a new Y" | "Rename Z to W" |
-| "Audit the security of Z" | "Add a comment to this function" |
-| "Migrate the database schema" | "Format this JSON" |
+### 🧠 Triggering Opus-Heavy (Complex)
+Use these keywords to trigger an Opus recommendation for deep reasoning:
+*   **Keywords:** `architect`, `refactor`, `migrate`, `rewrite`, `security audit`, `performance`, `optimize`, `database schema`, `multi-file`, `design system`, `overhaul`.
+*   **Structural Triggers:** Long prompts (>500 chars) or multiple code blocks.
+
+### ⚡ Triggering Haiku-Quick (Fast)
+Use these keywords for simple, low-cost tasks:
+*   **Keywords:** `typo`, `formatting`, `spell check`, `rename`, `add a comment`, `quick fix`, `simple`, `remove line`, `grammar`.
+*   **Structural Triggers:** Very short prompts (<80 chars).
+
+### 🤖 Direct Subagent Spawning
+You can bypass the router and spawn a sub-session directly by starting your prompt with the agent's name:
+*   *"**opus-heavy**, design the database schema for X."*
+*   *"**haiku-quick**, fix the typos in the README."*
+
+---
+
+## 8. Asking Claude the Right Way
 
 ### Use MCP servers explicitly
 

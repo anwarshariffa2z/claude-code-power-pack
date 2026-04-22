@@ -72,29 +72,23 @@ All plugins are fetched from their original authors' marketplaces — nothing is
 
 ## Installation
 
-### From Directory
+### ⚡ Quick Start (Automated)
+The easiest way to set up the Power Pack is using the included `setup.js` script.
+
+**Option A: Global (Recommended)**
+Registers hooks and agents globally so they are available in every project automatically.
 ```bash
-claude --plugin-dir /path/to/Claude\ Skill
+node setup.js --global-hooks
 ```
 
-### Copy to Project
-Copy the agents and hooks directories into your project's `.claude/` directory:
+**Option B: Local**
+Registers hooks and agents for the current project only.
 ```bash
-cp -r agents/ .claude/agents/
-cp -r skills/ .claude/skills/
+node setup.js --register-hooks
 ```
 
-Then add the hooks configuration to your `.claude/settings.json`:
-```json
-{
-  "hooks": {
-    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/session-start.js" }] }],
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/router.js" }] }],
-    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/context-tracker.js" }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/stop-guard.js" }] }]
-  }
-}
-```
+### Manual Installation (Optional)
+If you prefer manual control, copy the `agents/` and `hooks/` directories into your project's `.claude/` folder and add the hook configuration to your `.claude/settings.json` pointing to those files.
 
 ### Companion Tools Setup
 
