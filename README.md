@@ -169,3 +169,22 @@ All plugin state is stored in `hooks/state.json`:
 
 Reset by deleting this file or running: `echo '{}' > hooks/state.json`
 
+---
+
+## 🙏 Credits
+
+This plugin integrates and automates setup for the following excellent community tools:
+
+| Tool | Author | License |
+|------|--------|---------|
+| [ccstatusline](https://github.com/sirmalloc/ccstatusline) | [@sirmalloc](https://github.com/sirmalloc) (Matthew Breedlove) | MIT |
+| [Sequential Thinking MCP](https://github.com/modelcontextprotocol/servers) | Anthropic / MCP team | MIT |
+| [Context7 MCP](https://github.com/upstash/context7) | [Upstash](https://upstash.com) | MIT |
+| [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
+| [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
+
+> This project does not redistribute any third-party code — it only references and automates the setup of these tools. See [CREDITS.md](CREDITS.md) for full attribution details.
+
+## 📄 License
+
+The original code in this repository is released under the [MIT License](LICENSE).

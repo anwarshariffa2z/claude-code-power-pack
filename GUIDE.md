@@ -245,3 +245,7 @@ rm hooks/state.json
 ---
 
 **Made with ❤️ for the Claude Code community**
+
+---
+
+*This plugin integrates [ccstatusline](https://github.com/sirmalloc/ccstatusline) by [@sirmalloc](https://github.com/sirmalloc), the [Sequential Thinking MCP](https://github.com/modelcontextprotocol/servers) by Anthropic, [Context7](https://github.com/upstash/context7) by Upstash, and [Superpowers](https://github.com/obra/superpowers-marketplace) by [@obra](https://github.com/obra). See [CREDITS.md](CREDITS.md) for full attribution.*
