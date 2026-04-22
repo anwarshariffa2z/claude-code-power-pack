@@ -1,0 +1,171 @@
+# ⚡ Claude Code Power Pack
+
+> A full-lifecycle Claude Code plugin that automatically manages context usage, intelligently routes tasks to the right model tier, enforces compaction before context saturation, and bundles essential MCP servers and companion tools.
+
+**📖 New here? Read the [Beginner's Guide](GUIDE.md) for step-by-step setup instructions.**
+
+## Features
+
+### 🧠 Intelligent Model Routing
+Every prompt is scored using a weighted keyword and structural analysis system:
+- **Opus** (heavy): Architecture, refactors, multi-file rewrites, schema migrations
+- **Sonnet** (balanced): Standard implementation, debugging, features, tests
+- **Haiku** (quick): Typos, formatting, renames, one-liner fixes
+
+The plugin recommends the tier transparently in the prompt — no silent configuration hacking.
+
+### 📊 Tool-Aware Context Tracking
+Instead of counting turns (which is inaccurate), the `PostToolUse` hook fires after **every tool call** and estimates consumed tokens based on tool output size:
+- File reads: `chars / 4`
+- Bash output: `stdout + stderr / 4`
+- Search results: flat ~2000 tokens
+- Edits/Writes: diff-based estimation
+
+This gives a realistic picture of how full your context window actually is.
+
+### 🛡️ Auto-Compact Enforcement
+When estimated tokens exceed 50% of 200K (100,000 tokens):
+1. The **UserPromptSubmit** hook soft-warns Claude in the prompt
+2. The **Stop** hook hard-blocks Claude from completing its response (exit code 2)
+3. Claude is forced to ask you to run `/compact` before continuing
+
+### 🔄 Session Memory
+The **SessionStart** hook reads state from the previous session and injects it as context:
+- Previous turn count and token usage
+- Last model recommendation
+- Recent task log (last 5 items)
+- Compact count
+
+### 🤖 Pinned-Model Subagents
+Three custom agents with model fields that **actually work** (unlike settings.json which is snapshotted at startup):
+
+| Agent | Model | Use Case |
+|-------|-------|----------|
+| `opus-heavy` | Opus | Complex architectural work |
+| `sonnet-default` | Sonnet | General purpose coding |
+| `haiku-quick` | Haiku | Quick fixes and simple tasks |
+
+Claude auto-delegates to these based on the router's recommendation and the agent description matching.
+
+### 🔌 MCP Servers (Registered via CLI)
+These MCP servers are registered in your user settings by running `node setup.js`:
+
+| Server | Package | Purpose |
+|--------|---------|---------|
+| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | Structured step-by-step reasoning for complex problems |
+| `context7` | `@upstash/context7-mcp` (free tier) | Live, version-specific library documentation lookup |
+
+Registered via `claude mcp add` commands. Verify with `claude mcp list` or `/mcp` inside Claude Code.
+
+### 🛠️ Companion Tools (Setup Required)
+These tools complement the plugin but require separate installation:
+
+| Tool | Type | How to Use |
+|------|------|------------|
+| **ccstatusline** | Terminal status bar | Run `node setup.js` to configure |
+| **Superpowers** | Claude Code plugin | `/plugin install` inside Claude Code |
+| **code-simplifier** | Claude Code plugin | `/plugin install` inside Claude Code |
+
+## Installation
+
+### From Directory
+```bash
+claude --plugin-dir /path/to/Claude\ Skill
+```
+
+### Copy to Project
+Copy the agents and hooks directories into your project's `.claude/` directory:
+```bash
+cp -r agents/ .claude/agents/
+cp -r skills/ .claude/skills/
+```
+
+Then add the hooks configuration to your `.claude/settings.json`:
+```json
+{
+  "hooks": {
+    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/session-start.js" }] }],
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/router.js" }] }],
+    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/context-tracker.js" }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/stop-guard.js" }] }]
+  }
+}
+```
+
+### Companion Tools Setup
+
+#### Automatic (ccstatusline)
+```bash
+node setup.js           # Full setup — writes ccstatusline config to ~/.claude/settings.json
+node setup.js --dry-run # Preview changes without writing
+```
+
+#### Manual (Claude Code Plugins)
+Run these commands **inside Claude Code**:
+```
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+/plugin install code-simplifier@superpowers-marketplace
+/reload-plugins
+```
+
+## Architecture
+
+```
+Plugin
+├── plugin.json ────────► Plugin manifest (hooks config)
+├── setup.js ───────────► One-time setup: registers MCP servers via CLI,
+│                          configures ccstatusline, prints plugin install commands
+├── SessionStart ───────► session-start.js ───► Injects memory + tool list into context
+├── UserPromptSubmit ───► router.js ──────────► Scores prompt, recommends tier, warns if high
+├── PostToolUse ────────► context-tracker.js ─► Estimates tokens from every tool output
+├── Stop ───────────────► stop-guard.js ──────► Blocks completion if context > 50%
+├── Skills
+│   └── context-controller/SKILL.md ─────────► Governs context behavior + MCP usage guidance
+└── Agents
+    ├── opus-heavy.md ──── Pinned to Opus model
+    ├── sonnet-default.md ── Pinned to Sonnet model
+    └── haiku-quick.md ──── Pinned to Haiku model
+```
+
+## Configuration
+
+### Tuning the Context Threshold
+Edit `CONTEXT_THRESHOLD` in both `router.js` and `context-tracker.js`:
+```javascript
+const CONTEXT_THRESHOLD = 100000; // Default: 50% of 200K. Adjust as needed.
+```
+
+### Tuning Model Scoring
+Edit the `SCORING` object in `router.js` to add/remove/reweight keywords for your workflow.
+
+### Adjusting Turn History
+The task log in `state.json` keeps the last 20 entries. Adjust in `router.js`:
+```javascript
+if (state.taskLog.length > 20) {
+  state.taskLog = state.taskLog.slice(-20);
+}
+```
+
+## Requirements
+- **Node.js** (v16+) — Required for all hook scripts
+- **Claude Code** with plugin/hooks support
+- API access to desired model tiers (Opus, Sonnet, Haiku)
+
+## State File
+All plugin state is stored in `hooks/state.json`:
+```json
+{
+  "turns": 0,
+  "estimatedTokens": 0,
+  "contextWarning": false,
+  "lastModel": "sonnet",
+  "taskLog": [],
+  "sessionId": "session_...",
+  "compactCount": 0,
+  "lastSessionSummary": ""
+}
+```
+
+Reset by deleting this file or running: `echo '{}' > hooks/state.json`
+

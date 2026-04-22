@@ -1,0 +1,47 @@
+{
+  "name": "context-and-model-manager",
+  "version": "2.1.0",
+  "description": "Full-lifecycle context guardian and intelligent model router for Claude Code. Tracks token usage via tool outputs, enforces auto-compaction at 50% context, delegates tasks to pinned-model subagents. Run setup.js to register MCP servers and companion tools.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/session-start.js"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/router.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/context-tracker.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/stop-guard.js"
+          }
+        ]
+      }
+    ]
+  }
+}
