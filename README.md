@@ -47,24 +47,25 @@ Three custom agents with model fields that **actually work** (unlike settings.js
 
 Claude auto-delegates to these based on the router's recommendation and the agent description matching.
 
-### 🔌 MCP Servers (Registered via CLI)
-These MCP servers are registered in your user settings by running `node setup.js`:
+### 🔌 MCP Servers (Auto-registered via CLI)
+Registered in your user-level settings by `node setup.js` using `claude mcp add`:
 
 | Server | Package | Purpose |
 |--------|---------|---------|
-| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | Structured step-by-step reasoning for complex problems |
-| `context7` | `@upstash/context7-mcp` (free tier) | Live, version-specific library documentation lookup |
+| `sequential-thinking` | `@modelcontextprotocol/server-sequential-thinking` | Structured step-by-step reasoning |
+| `context7` | `@upstash/context7-mcp` (free tier) | Live, version-specific library docs |
 
-Registered via `claude mcp add` commands. Verify with `claude mcp list` or `/mcp` inside Claude Code.
+Verify with `claude mcp list` or `/mcp` inside Claude Code.
 
-### 🛠️ Companion Tools (Setup Required)
-These tools complement the plugin but require separate installation:
+### 🛠️ Companion Plugins (Installed from authors' official marketplaces)
+All plugins are fetched from their original authors' marketplaces — nothing is redistributed here:
 
-| Tool | Type | How to Use |
-|------|------|------------|
-| **ccstatusline** | Terminal status bar | Run `node setup.js` to configure |
-| **Superpowers** | Claude Code plugin | `/plugin install` inside Claude Code |
-| **code-simplifier** | Claude Code plugin | `/plugin install` inside Claude Code |
+| Plugin | Author | What It Does |
+|--------|--------|-------------|
+| 🪨 [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) | Cuts ~75% of output tokens — same accuracy, way fewer words |
+| ✨ [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | Structured planning and workflow methodology |
+| 🔧 [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | `/simplify` command — refactor messy code |
+| 🎯 [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) | Disciplined coding: think first, surgical changes, no over-engineering |
 
 ## Installation
 
@@ -173,17 +174,20 @@ Reset by deleting this file or running: `echo '{}' > hooks/state.json`
 
 ## 🙏 Credits
 
-This plugin integrates and automates setup for the following excellent community tools:
+This plugin integrates and automates setup for the following excellent community tools.
+**All plugins are installed from their authors' official marketplaces — nothing is redistributed here.**
 
 | Tool | Author | License |
 |------|--------|---------|
 | [ccstatusline](https://github.com/sirmalloc/ccstatusline) | [@sirmalloc](https://github.com/sirmalloc) (Matthew Breedlove) | MIT |
 | [Sequential Thinking MCP](https://github.com/modelcontextprotocol/servers) | Anthropic / MCP team | MIT |
 | [Context7 MCP](https://github.com/upstash/context7) | [Upstash](https://upstash.com) | MIT |
+| [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) (Julius Brussee) | MIT |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
 | [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
+| [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) (Forrest Chang) | See repo |
 
-> This project does not redistribute any third-party code — it only references and automates the setup of these tools. See [CREDITS.md](CREDITS.md) for full attribution details.
+> See [CREDITS.md](CREDITS.md) for full attribution with repository links, license details, and how each tool is used.
 
 ## 📄 License
 

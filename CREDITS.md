@@ -1,77 +1,98 @@
 # Credits & Acknowledgements
 
-Claude Code Power Pack is built on the shoulders of giants. This project integrates
-and builds upon the excellent work of these developers and organizations:
+Claude Code Power Pack integrates and automates the setup of tools built by these
+developers and organizations. All plugins are installed from their authors' official
+sources — no third-party code is bundled or redistributed here.
 
 ---
 
-## 🛠️ Tools & Integrations
+## 🛠️ Companion Tools & Plugins
 
 ### ccstatusline
-> Terminal status bar for Claude Code — shows tokens, cost, git info, and more
+> Terminal status bar — tokens, cost, git branch, model, session time
 
 - **Author:** Matthew Breedlove ([@sirmalloc](https://github.com/sirmalloc))
 - **Repository:** https://github.com/sirmalloc/ccstatusline
 - **npm:** https://www.npmjs.com/package/ccstatusline
 - **License:** MIT
-- **Usage:** Referenced in `setup.js` as the `statusLine` command handler in Claude Code settings
+- **How we use it:** Referenced as the `statusLine` command in Claude Code settings (configured by `setup.js`)
 
 ---
 
 ### Sequential Thinking MCP Server
-> MCP server for structured, step-by-step reasoning in complex tasks
+> Structured step-by-step reasoning tool for complex problems
 
 - **Author:** Anthropic & the Model Context Protocol team
 - **Repository:** https://github.com/modelcontextprotocol/servers
 - **npm:** `@modelcontextprotocol/server-sequential-thinking`
 - **License:** MIT
-- **Usage:** Registered via `claude mcp add` in `setup.js` to give Claude a structured thinking tool
+- **How we use it:** Registered via `claude mcp add` in `setup.js` to give Claude a structured thinking tool
 
 ---
 
 ### Context7 MCP Server
-> MCP server providing live, version-specific library documentation
+> Live, version-specific library documentation
 
 - **Author:** [Upstash](https://upstash.com)
 - **Repository:** https://github.com/upstash/context7
 - **npm:** `@upstash/context7-mcp`
-- **License:** MIT (MCP client code); backend service is proprietary/hosted by Upstash
-- **Usage:** Registered via `claude mcp add` in `setup.js` to give Claude real-time API docs
+- **License:** MIT (MCP client code); backend service is hosted by Upstash
+- **How we use it:** Registered via `claude mcp add` in `setup.js` for real-time API docs
 
 ---
 
-### Superpowers (Claude Code Plugin)
-> Agentic skills framework — structured planning, brainstorming, and workflow skills
+### Caveman
+> 🪨 Cuts ~75% of output tokens by making Claude respond concisely — same accuracy, way less fluff
+
+- **Author:** Julius Brussee ([@JuliusBrussee](https://github.com/JuliusBrussee))
+- **Repository:** https://github.com/JuliusBrussee/caveman
+- **Stars:** 42.9k+ ⭐
+- **License:** MIT
+- **Marketplace:** `JuliusBrussee/caveman`
+- **How we use it:** Installed via `claude plugin install caveman@caveman` from the author's own marketplace
+
+---
+
+### Superpowers
+> Agentic skills framework — structured planning, brainstorming, and workflow methodology
 
 - **Author:** Jesse Vincent ([@obra](https://github.com/obra))
 - **Marketplace:** https://github.com/obra/superpowers-marketplace
 - **License:** See repository
-- **Usage:** Optional companion plugin, installed separately inside Claude Code via `/plugin install`
+- **How we use it:** Installed via `claude plugin install superpowers@superpowers-marketplace`
 
 ---
 
-### code-simplifier (Claude Code Plugin)
+### code-simplifier
 > Refactoring agent — the `/simplify` command for cleaning up complex code
 
-- **Author:** Jesse Vincent ([@obra](https://github.com/obra)) via the Superpowers marketplace
+- **Author:** Jesse Vincent ([@obra](https://github.com/obra))
 - **Marketplace:** https://github.com/obra/superpowers-marketplace
 - **License:** See repository
-- **Usage:** Optional companion plugin, installed separately inside Claude Code via `/plugin install`
+- **How we use it:** Installed via `claude plugin install code-simplifier@superpowers-marketplace`
+
+---
+
+### Andrej Karpathy Skills
+> Disciplined AI-assisted coding principles: think before coding, simplicity first, surgical changes, goal-driven execution
+
+- **Author:** Forrest Chang ([@forrestchang](https://github.com/forrestchang))
+- **Repository:** https://github.com/forrestchang/andrej-karpathy-skills
+- **Based on:** Principles articulated by [Andrej Karpathy](https://github.com/karpathy)
+- **Marketplace:** `forrestchang/andrej-karpathy-skills`
+- **License:** See repository
+- **How we use it:** Installed via `claude plugin install andrej-karpathy-skills@karpathy-skills`
 
 ---
 
 ## 🤖 Platform
 
 ### Claude Code
-> The AI coding assistant this plugin is built for
-
 - **Author:** [Anthropic](https://anthropic.com)
 - **Documentation:** https://docs.anthropic.com/en/docs/claude-code/overview
 - **License:** Proprietary
 
 ### Model Context Protocol (MCP)
-> The open protocol that enables Claude to communicate with external tools and servers
-
 - **Author:** [Anthropic](https://anthropic.com) & the open-source community
 - **Website:** https://modelcontextprotocol.io
 - **Repository:** https://github.com/modelcontextprotocol
@@ -81,14 +102,10 @@ and builds upon the excellent work of these developers and organizations:
 
 ## 📝 License
 
-The original code in this repository (hooks, agents, skills, setup script) is released
-under the **MIT License** — see [LICENSE](LICENSE) for details.
+The original code in this repository — the hooks (`router.js`, `context-tracker.js`, `session-start.js`, `stop-guard.js`), agents, skills, and `setup.js` — is released under the **MIT License**. See [LICENSE](LICENSE) for details.
 
-All third-party tools listed above retain their respective licenses. This project
-does not redistribute any third-party code — it only references, integrates, and
-provides setup automation for these tools.
+All third-party tools listed above retain their respective licenses. This project does not redistribute any third-party code — it only references, integrates, and provides setup automation for these tools.
 
 ---
 
-*If you are an author of any tool referenced here and would like to update this
-attribution or request changes, please open an issue or pull request.*
+*If you are an author of any tool referenced here and would like to update this attribution or request changes, please open an issue or pull request at https://github.com/anwarshariffa2z/claude-code-power-pack*

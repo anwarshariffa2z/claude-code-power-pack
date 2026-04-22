@@ -1,251 +1,529 @@
-# 🚀 Beginner's Guide: Claude Code Power Pack
+# 🪨⚡ Claude Code Power Pack — Complete Guide
 
-Welcome! This guide will take you from zero to a fully supercharged Claude Code setup. No prior experience needed.
-
----
-
-## 📋 What You're Getting
-
-This plugin gives Claude Code **7 superpowers** out of the box:
-
-| # | Feature | What It Does |
-|---|---------|-------------|
-| 1 | **Context Tracking** | Monitors how much of Claude's memory (context window) you've used |
-| 2 | **Auto-Compaction** | Forces a cleanup when memory gets too full, so Claude stays accurate |
-| 3 | **Model Routing** | Automatically picks the right Claude model (Opus/Sonnet/Haiku) for each task |
-| 4 | **Session Memory** | Remembers what you were working on between sessions |
-| 5 | **Sequential Thinking** | Gives Claude a structured "think step by step" tool for complex problems |
-| 6 | **Context7 Docs** | Gives Claude access to live, up-to-date library documentation |
-| 7 | **Status Bar** | Shows token usage, cost, git branch, and more at the bottom of your terminal |
+> **For beginners and power users alike.** This guide explains what each part of the plugin does, why it matters, and exactly how to use it in your daily coding workflow.
 
 ---
 
-## 🛠️ Prerequisites
+## 📋 Table of Contents
 
-Before you start, make sure you have:
+1. [What Is This?](#1-what-is-this)
+2. [Prerequisites](#2-prerequisites)
+3. [Installation](#3-installation)
+4. [What Each Feature Does — In Plain English](#4-what-each-feature-does--in-plain-english)
+5. [Real-World Usage Scenarios](#5-real-world-usage-scenarios)
+6. [The Status Bar Explained](#6-the-status-bar-explained)
+7. [Asking Claude the Right Way](#7-asking-claude-the-right-way)
+8. [Troubleshooting](#8-troubleshooting)
+9. [Credits](#9-credits)
 
-- [ ] **Node.js** (v16 or higher) — [Download here](https://nodejs.org/)
-- [ ] **Claude Code** installed — [Install guide](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [ ] **Git** (optional, for cloning) — [Download here](https://git-scm.com/)
+---
 
-### How to check if you have them:
+## 1. What Is This?
+
+Claude Code is a powerful AI coding assistant. But out of the box it has some limitations:
+
+- **It forgets** — Claude has a finite memory (called a "context window"). Once it's full, responses get worse and Claude starts forgetting earlier parts of your conversation.
+- **It's verbose** — Claude often uses many words when a few would do, burning through your API budget.
+- **It doesn't know which model to use** — Opus is smarter but more expensive; Haiku is cheap and fast. Picking manually every time is a chore.
+- **It doesn't remember between sessions** — Each time you start Claude Code fresh, it has no idea what you were working on.
+
+**The Claude Code Power Pack fixes all of this automatically.** It's a collection of hooks, agents, skills, and companion tool integrations that wrap around Claude Code and make it dramatically more productive, efficient, and predictable.
+
+---
+
+## 2. Prerequisites
+
+You need these installed before starting:
+
+| Tool | Why | Download |
+|------|-----|----------|
+| **Node.js v16+** | Runs the plugin hooks | [nodejs.org](https://nodejs.org/) |
+| **Claude Code** | The AI assistant this runs on top of | [Install guide](https://docs.anthropic.com/en/docs/claude-code/overview) |
+| **Git** (optional) | For cloning the repo | [git-scm.com](https://git-scm.com/) |
+
+**Check you have them:**
 ```bash
-node --version    # Should show v16.x.x or higher
-claude --version  # Should show Claude Code version
-git --version     # Should show git version (optional)
+node --version    # Must show v16.x.x or higher
+claude --version  # Must show Claude Code version
 ```
 
 ---
 
-## 📥 Step 1: Get the Plugin
+## 3. Installation
 
-### Option A: Clone from GitHub (Recommended)
+### Step 1 — Get the plugin
 ```bash
 git clone https://github.com/anwarshariffa2z/claude-code-power-pack.git
 cd claude-code-power-pack
 ```
 
-### Option B: Download ZIP
-1. Go to https://github.com/anwarshariffa2z/claude-code-power-pack
-2. Click the green **"Code"** button
-3. Click **"Download ZIP"**
-4. Extract it somewhere you'll remember
-
----
-
-## ⚡ Step 2: Run the Setup Script
-
-Open a terminal in the plugin folder and run:
-
+### Step 2 — Run the setup script
 ```bash
 node setup.js
 ```
 
-This will automatically:
-- ✅ Register the **Sequential Thinking** MCP server
-- ✅ Register the **Context7** MCP server  
-- ✅ Configure **ccstatusline** (if not already set up)
-- 📋 Print commands you need to run for the remaining plugins
+This single command:
+- Registers the Sequential Thinking and Context7 MCP servers
+- Configures the ccstatusline terminal HUD
+- Installs Caveman, Superpowers, code-simplifier, and Karpathy Skills from their official marketplaces
 
-### What you'll see:
-```
-╔══════════════════════════════════════════════════════════════╗
-║     Context & Model Manager — Plugin Setup v2.1             ║
-╚══════════════════════════════════════════════════════════════╝
+> **Preview first?** Run `node setup.js --dry-run` to see exactly what it would do without changing anything.
 
-Step 1: MCP Servers (via CLI)
-  ✔ sequential-thinking — Structured step-by-step reasoning
-  ✔ context7 — Live library documentation lookup
+### Step 3 — Load the plugin
 
-Step 2: ccstatusline (Terminal Status Bar)
-  ✔ statusLine configured
-
-Step 3: Claude Code Plugins (Manual)
-  Run these inside Claude Code...
-```
-
-> **💡 Tip:** Run `node setup.js --dry-run` first if you want to preview what it does without making changes.
-
----
-
-## 🔌 Step 3: Load the Plugin in Claude Code
-
-Start Claude Code with the plugin directory:
-
+**Option A: Global (all projects)**
 ```bash
 claude --plugin-dir /path/to/claude-code-power-pack
 ```
 
-**Or** copy the files into your project:
+**Option B: Per project** — copy into your project's `.claude/` folder:
 ```bash
-# From inside your project folder:
-cp -r /path/to/claude-code-power-pack/agents .claude/agents
-cp -r /path/to/claude-code-power-pack/skills .claude/skills
-cp -r /path/to/claude-code-power-pack/hooks .claude/hooks
+cp -r agents .claude/agents
+cp -r skills .claude/skills
+cp -r hooks  .claude/hooks
 ```
 
-Then add hooks to your project's `.claude/settings.json`:
+Then create or update `.claude/settings.json`:
 ```json
 {
   "hooks": {
-    "SessionStart": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/session-start.js" }] }],
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/router.js" }] }],
-    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/context-tracker.js" }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/stop-guard.js" }] }]
+    "SessionStart":      [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/session-start.js" }] }],
+    "UserPromptSubmit":  [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/router.js" }] }],
+    "PostToolUse":       [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/context-tracker.js" }] }],
+    "Stop":              [{ "hooks": [{ "type": "command", "command": "node .claude/hooks/stop-guard.js" }] }]
   }
 }
 ```
 
----
-
-## 🎯 Step 4: Install Companion Plugins (Optional but Recommended)
-
-Open Claude Code and type these commands:
-
+### Step 4 — Reload plugins
+Inside Claude Code, run:
 ```
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-/plugin install code-simplifier@superpowers-marketplace
 /reload-plugins
 ```
 
-This adds:
-- **Superpowers** — Structured planning and brainstorming workflows
-- **code-simplifier** — The `/simplify` command for cleaning up messy code
+---
+
+## 4. What Each Feature Does — In Plain English
+
+### 🧠 Intelligent Model Routing (Automatic)
+
+**What it does:** Every time you type a message to Claude, the plugin secretly scores your prompt for complexity. It then recommends the right model tier:
+
+| Tier | When used | Examples |
+|------|-----------|----------|
+| **Opus** | Complex, deep work | "Refactor the entire auth system", "Design a new database schema", "Audit this code for security issues" |
+| **Sonnet** | Everyday coding | "Add a login page", "Fix this bug", "Write tests for this function" |
+| **Haiku** | Quick, trivial tasks | "Fix this typo", "Rename this variable", "Add a comment here" |
+
+**Why it matters:** Opus is ~15x more expensive than Haiku. Using the right model for each task saves money without sacrificing quality.
+
+**How you see it:** Every response starts with something like:
+```
+[Model Router] Task complexity score: heavy=7, light=1 → Recommended: opus
+```
 
 ---
 
-## 🎨 Step 5: Customize ccstatusline (Optional)
+### 📊 Tool-Aware Context Tracking (Automatic)
 
-If you want to customize the look of your terminal status bar:
+**What it does:** Claude has a 200,000 token context window — think of it like RAM. Every file you read, every command you run, every response Claude gives costs tokens. When the window fills up, Claude's responses degrade.
 
-```bash
-npx ccstatusline@latest
-```
+This plugin tracks token usage **after every single tool call** (not just every message), so the estimate is far more accurate than turn-counting. It uses these estimates:
+- A file read: characters ÷ 4
+- A bash command: stdout + stderr ÷ 4
+- A web search: ~2,000 tokens flat
+- An edit: diff size × 0.6
 
-This opens an interactive setup where you can:
-- Pick a theme (Tokyo Night, Catppuccin, Gruvbox, etc.)
-- Choose which widgets to show (tokens, cost, git branch, etc.)
-- Preview your status bar in real-time
+**Why it matters:** Without tracking, you don't know you're at 90% until Claude starts giving strange answers. With tracking, you get warned at 50% and can act before things go wrong.
 
----
-
-## ✅ Step 6: Verify Everything Works
-
-### Check MCP Servers
-```bash
-claude mcp list
-```
-You should see `sequential-thinking` and `context7` in the list.
-
-### Check Inside Claude Code
-Type `/mcp` inside Claude Code — both servers should appear as active.
-
-### Test the Model Router
-Try different prompts and watch the model recommendation:
-- **Simple:** "Fix this typo" → Should recommend **Haiku**
-- **Normal:** "Add a login page" → Should recommend **Sonnet**
-- **Complex:** "Refactor the entire authentication system" → Should recommend **Opus**
-
-### Check Context Tracking
-After a few interactions, ask Claude: **"How's the context?"**
-You should see a dashboard like:
+**How you see it:** Ask Claude: _"How's the context?"_ and you'll get:
 ```
 📊 Context Dashboard
 ────────────────────
-  Turns:     5
-  Est. Tokens: 12,450 / 200,000
-  Usage:     6%
-  Model Tier: sonnet
-  Status:    🟢 Healthy
+  Turns:       12
+  Est. Tokens: 87,400 / 200,000
+  Usage:       44%
+  Model Tier:  sonnet
+  Status:      🟡 Moderate
 ```
 
 ---
 
-## 🗺️ How It Works (The Big Picture)
+### 🛡️ Auto-Compaction Guard (Automatic)
+
+**What it does:** When estimated token usage crosses 50% (100,000 tokens), the plugin takes two actions:
+
+1. **Soft warning** — The next prompt you send includes a hidden directive telling Claude to warn you before doing more work.
+2. **Hard block** — The Stop hook fires with exit code 2, which forces Claude to deliver a message asking you to run `/compact` instead of continuing.
+
+**Why it matters:** `/compact` tells Claude Code to summarize the entire conversation into a shorter form, freeing up context while keeping the important context. Without a guard, you'd only notice the problem after Claude starts hallucinating or losing track of your codebase.
+
+**What to do when it fires:**
+```
+# Just run this in Claude Code:
+/compact
+```
+
+After compacting, Claude will re-read the session summary and continue as if nothing happened.
+
+---
+
+### 🔄 Session Memory (Automatic)
+
+**What it does:** Every time Claude Code starts (or resumes), the `SessionStart` hook fires and injects a summary of your previous session:
 
 ```
-You type a prompt
-       ↓
-┌─────────────────────────┐
-│  UserPromptSubmit Hook  │ ← router.js scores your prompt
-│  (Model Router)         │   and recommends Opus/Sonnet/Haiku
-└──────────┬──────────────┘
-           ↓
-    Claude processes it
-           ↓
-┌─────────────────────────┐
-│  PostToolUse Hook       │ ← context-tracker.js estimates
-│  (Context Tracker)      │   tokens used by each tool call
-└──────────┬──────────────┘
-           ↓
-┌─────────────────────────┐
-│  Stop Hook              │ ← stop-guard.js blocks Claude if
-│  (Stop Guard)           │   context exceeds 50% — asks you
-└──────────┬──────────────┘   to run /compact
-           ↓
-    Response delivered
-    (with status bar showing live stats)
+📋 Previous Session Summary:
+  • Turns completed: 23
+  • Estimated tokens used: 145.2K / 200K
+  • Last model tier: opus
+  • Times compacted: 1
+
+📝 Recent Task Log:
+  • [opus] Refactored authentication middleware...
+  • [sonnet] Added unit tests for user service...
+  • [haiku] Fixed typo in README...
+```
+
+**Why it matters:** Normally, every new Claude session starts completely blank. With session memory, Claude knows what you were building, what models you were using, and what was recently accomplished — even after you close and reopen your terminal.
+
+---
+
+### 🤖 Pinned-Model Subagents (Available on demand)
+
+**What it does:** Three specialist agents are available that are permanently locked to specific models:
+
+| Agent | Model | Use when |
+|-------|-------|---------|
+| `opus-heavy` | Claude Opus | Architectural decisions, complex multi-file refactors, security audits |
+| `sonnet-default` | Claude Sonnet | Standard features, debugging, writing tests |
+| `haiku-quick` | Claude Haiku | Formatting, typos, one-line changes |
+
+**Why they exist:** When you use `settings.json` to change models, it only applies at startup — you can't switch mid-session. These subagents run in completely separate context windows pinned to their model, so the switch actually works.
+
+**How to use them:** Just ask Claude naturally:
+> _"Delegate this refactor to your opus-heavy agent."_
+
+Or when the Model Router recommends Opus, Claude will automatically suggest using it.
+
+---
+
+### 🔌 Sequential Thinking MCP Server (Available on demand)
+
+**What it does:** Gives Claude a structured "chain of thought" tool that breaks problems into numbered steps before acting. Instead of just diving in, Claude documents its reasoning process explicitly.
+
+**Why it matters:** For complex problems (architectural decisions, debugging tricky race conditions, designing APIs), unstructured thinking leads to mistakes. Sequential thinking forces a methodical approach.
+
+**How to use it:** Just ask:
+> _"Use sequential thinking to plan this refactor."_
+> _"Think through this step by step before writing any code."_
+
+Claude will then use the `sequentialthinking` tool to document each reasoning step before producing code.
+
+---
+
+### 📚 Context7 MCP Server (Available on demand)
+
+**What it does:** Gives Claude access to live, version-specific documentation for any library or framework. Instead of relying on training data (which can be months or years old), Claude fetches the actual current docs.
+
+**Why it matters:** APIs change. A method that existed in React 17 might be deprecated in React 19. Context7 ensures Claude's code uses the APIs that actually exist in your version.
+
+**How to use it:** Add "use context7" to your prompt:
+> _"Use context7 to look up the latest Next.js App Router docs before answering."_
+> _"How do I configure Prisma 5 migrations? use context7."_
+
+---
+
+### 🪨 Caveman (Plugin — 75% token reduction)
+
+**What it does:** Makes Claude respond in ultra-concise caveman-speak — same technical accuracy, dramatically fewer words. Cuts ~75% of output tokens.
+
+**Before Caveman:**
+> "The reason your React component is re-rendering is likely because you're creating a new object reference on each render cycle. When you pass an inline object as a prop, React's shallow comparison sees it as a different object every time, which triggers a re-render. I'd recommend using useMemo to memoize the object."
+
+**After Caveman:**
+> "New object ref each render. Inline prop = new ref = re-render. Wrap in useMemo."
+
+Same fix. 75% fewer tokens. 3x faster.
+
+**How to use it:**
+```
+/caveman         # Standard caveman mode
+/caveman ultra   # Maximum compression
+/caveman off     # Back to normal mode
+```
+
+Or always-on for your whole session: Caveman auto-activates based on your configuration after install.
+
+---
+
+### ✨ Superpowers (Plugin — structured planning)
+
+**What it does:** Adds structured workflow skills to Claude — guided brainstorming, planning phases, and systematic task execution. Instead of just asking Claude to build something and hoping for the best, Superpowers gives Claude a methodology.
+
+**How to use it:**
+> _"Use the planning skill to design this feature before coding."_
+
+Claude will walk through: problem framing → solution options → decision → implementation plan → execution.
+
+---
+
+### 🔧 code-simplifier (Plugin — /simplify command)
+
+**What it does:** Analyzes your current code for unnecessary complexity — deeply nested conditionals, repeated patterns, unclear variable names — and refactors it cleanly without changing what it does.
+
+**How to use it:** At the end of a long coding session:
+```
+/simplify
+```
+
+Run it before committing, before code review, or whenever a file starts feeling messy after many iterations.
+
+---
+
+### 🎯 Karpathy Skills (Plugin — disciplined coding principles)
+
+**What it does:** Applies Andrej Karpathy's guidelines for disciplined AI-assisted coding:
+1. **Think before coding** — State assumptions, present options, ask if confused
+2. **Simplicity first** — Don't add unrequested features or abstractions
+3. **Surgical changes** — Only modify what's needed; don't refactor unrelated code
+4. **Goal-driven execution** — Turn vague tasks into verifiable goals with success criteria
+
+**Why it matters:** Without guardrails, AI coding assistants tend to over-engineer, over-explain, and modify code they weren't asked to touch. Karpathy Skills keeps Claude focused and disciplined.
+
+**How to use it:** It's always on once installed. Claude will automatically apply these principles. You'll notice Claude:
+- Asks for clarification when your request is ambiguous instead of guessing
+- Avoids touching files that aren't relevant to your request
+- States its assumptions before acting
+
+---
+
+## 5. Real-World Usage Scenarios
+
+### Scenario A: Starting a New Feature
+
+You sit down to add a user authentication system to your app.
+
+```
+You: "Add JWT authentication to my Express API"
+```
+
+**What happens automatically:**
+1. The **Model Router** scores "add JWT authentication" as medium complexity → recommends **Sonnet**
+2. **Context Tracker** notes this is a fresh session — no warnings
+3. **Session Memory** tells Claude what you were building in your last session
+4. **Karpathy Skills** ensures Claude asks: "Should this be a new middleware module, or integrated into the existing auth file?"
+5. **Context7** can be invoked to fetch current `jsonwebtoken` docs: _"Use context7 for jsonwebtoken v9"_
+
+---
+
+### Scenario B: Big Architectural Refactor
+
+You want to refactor your entire database layer from raw SQL to Prisma.
+
+```
+You: "Migrate the entire database layer to use Prisma ORM"
+```
+
+**What happens:**
+1. **Model Router** scores this very high (migrate + entire + database) → recommends **Opus**
+2. Claude says: _"This is a complex migration — I'll delegate to my opus-heavy agent."_
+3. The **opus-heavy subagent** handles it in an isolated context window (not consuming your main context)
+4. You ask it to **think step by step**: Claude uses Sequential Thinking to map out: schema analysis → model generation → query migration → testing strategy
+5. After several large file reads, the **Context Tracker** warns at 50%: _"Context is getting full — run /compact before continuing"_
+6. You run `/compact`, Claude summarizes, and continues fresh
+
+---
+
+### Scenario C: Quick Fix During a Code Review
+
+Your colleague spotted a typo and two small formatting issues.
+
+```
+You: "Fix typo 'recieve' → 'receive' in user.service.ts, and fix the indentation in lines 45-52"
+```
+
+**What happens:**
+1. **Model Router** scores this as trivial (typo, fix) → recommends **Haiku**
+2. Claude delegates to the **haiku-quick agent** — fast and cheap
+3. **Caveman mode** (if on) keeps the response brief: _"Fixed. 3 chars changed."_
+4. The fix takes 2 seconds and costs ~$0.001
+
+Without the Power Pack: Claude Opus would have written 3 paragraphs explaining what a typo is.
+
+---
+
+### Scenario D: Long Working Session
+
+You've been working with Claude for 3 hours. The context is getting heavy.
+
+The **Stop Guard** fires:
+```
+⚠️ Context usage: ~143,000 tokens (71% of 200K window)
+
+Before completing this response, I need to let you know our context 
+window is getting full. Here's what we've accomplished so far:
+- ✅ Migrated auth layer to Prisma
+- ✅ Added JWT middleware
+- ✅ Updated 12 controller files
+
+I recommend running /compact to summarize and free up context.
+```
+
+You run `/compact`. Claude Code compresses the conversation. Next session, **Session Memory** picks it back up:
+```
+📋 Previous Session Summary:
+  • Turns: 34 | Tokens: 143K | Compacts: 1
+  • Recent: [opus] Migrated auth, added JWT, updated controllers
+```
+
+You continue exactly where you left off.
+
+---
+
+### Scenario E: Learning a New Library
+
+You're trying to use the latest version of TanStack Query.
+
+```
+You: "How do I use the new infinite scroll query pattern in TanStack Query v5? use context7"
+```
+
+**What happens:**
+1. **Context7 MCP** fetches the actual TanStack Query v5 docs — not cached training data
+2. Claude gives you code using the APIs that exist right now, in v5 specifically
+3. No more deprecated patterns from v4 being suggested
+
+---
+
+## 6. The Status Bar Explained
+
+After setup, the bottom of your terminal shows a live status bar from **ccstatusline**:
+
+```
+⚡ main  |  🪙 $0.12  |  📊 23K tokens (11%)  |  🤖 sonnet  |  ⏱ 14m
+```
+
+| Icon | Meaning |
+|------|---------|
+| `⚡ main` | Current git branch |
+| `🪙 $0.12` | Session cost so far |
+| `📊 23K tokens (11%)` | Estimated context usage |
+| `🤖 sonnet` | Current model tier |
+| `⏱ 14m` | Session duration |
+
+The token percentage turns **yellow at 50%** and **red at 75%** — matching the plugin's warning thresholds.
+
+**Customize it:**
+```bash
+npx ccstatusline@latest
+```
+Opens an interactive TUI to pick themes, reorder widgets, change colors.
+
+---
+
+## 7. Asking Claude the Right Way
+
+### Trigger model routing intentionally
+
+| You want Opus | You want Haiku |
+|---------------|----------------|
+| "Refactor the entire X" | "Fix the typo in X" |
+| "Architect a new Y" | "Rename Z to W" |
+| "Audit the security of Z" | "Add a comment to this function" |
+| "Migrate the database schema" | "Format this JSON" |
+
+### Use MCP servers explicitly
+
+```
+# Sequential Thinking
+"Think through this step by step before writing any code."
+"Use sequential thinking to plan the migration."
+
+# Context7
+"use context7 — how do I use useFormState in React 19?"
+"Fetch the latest Express 5 docs via context7 before answering."
+```
+
+### Switch Caveman modes
+
+```
+/caveman        # Concise mode
+/caveman ultra  # Maximum brevity
+/caveman off    # Normal mode
+```
+
+### Check context health
+
+```
+"How's the context?"
+"Context status"
+"How full are we?"
+```
+
+### Ask Claude to delegate
+
+```
+"Delegate this to your opus-heavy agent."
+"Use the haiku-quick agent for this — it's a simple rename."
+"Run /simplify on this file before we continue."
 ```
 
 ---
 
-## ❓ Troubleshooting
+## 8. Troubleshooting
 
-### "MCP server not found"
-Make sure you ran `node setup.js` and have Node.js installed. The MCP servers use `npx` to download packages on first use.
+### "MCP server not found" / Context7 not working
+Run `node setup.js` again. Make sure Node.js is installed. The servers download via `npx` on first use — this requires internet access.
 
-### "Context tracker shows 0 tokens"
-This is normal for a fresh session. The tracker only counts tokens after tool calls (file reads, searches, etc.), not plain conversation.
+Verify: `claude mcp list` — you should see `sequential-thinking` and `context7`.
 
-### "Model router always says Sonnet"
-Sonnet is the default for most prompts. The router only recommends Opus for heavy keywords (refactor, architect, migrate) or Haiku for trivial ones (typo, rename, formatting).
+### Model Router always recommends Sonnet
+Sonnet is the default for ambiguous prompts. It only switches to Opus for strong keywords (refactor, architect, migrate, entire, overhaul) or Haiku for trivial keywords (typo, rename, formatting). The system is conservative by design — it won't switch unless confident.
 
-### "Status bar not showing"
-Make sure ccstatusline is installed: `npx ccstatusline@latest`. Then restart Claude Code.
+You can always delegate manually: _"Use the opus-heavy agent for this."_
+
+### Context shows 0% even after heavy work
+The tracker only counts tokens from **tool calls** (file reads, bash commands, searches), not from plain conversation. After Claude does its first `Read` or `Bash` call, the counter will start accumulating.
+
+### Caveman mode responding normally
+Caveman requires the plugin to be installed and activated. Run `/caveman` explicitly in your session, or check that the plugin is enabled: `/plugins`.
+
+### Stop Guard firing too often
+The 50% threshold is conservative. Raise it by editing `CONTEXT_THRESHOLD` in both `hooks/router.js` and `hooks/context-tracker.js`:
+```javascript
+const CONTEXT_THRESHOLD = 150000; // 75% instead of 50%
+```
 
 ### Reset everything
-Delete the state file to start fresh:
+Delete the state file to clear all tracked history:
 ```bash
 # Windows
 del hooks\state.json
 
-# macOS/Linux
+# macOS / Linux
 rm hooks/state.json
 ```
 
 ---
 
-## 📚 Further Reading
+## 9. Credits
 
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [MCP Protocol Specification](https://modelcontextprotocol.io/)
-- [ccstatusline on npm](https://www.npmjs.com/package/ccstatusline)
+This plugin integrates the following excellent community tools — all installed from their authors' official sources:
+
+| Tool | Author | What it does |
+|------|--------|-------------|
+| [ccstatusline](https://github.com/sirmalloc/ccstatusline) | [@sirmalloc](https://github.com/sirmalloc) | Terminal status bar |
+| [Sequential Thinking](https://github.com/modelcontextprotocol/servers) | Anthropic / MCP team | Structured reasoning |
+| [Context7](https://github.com/upstash/context7) | [Upstash](https://upstash.com) | Live library docs |
+| [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) | 75% token reduction |
+| [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | Planning methodology |
+| [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | /simplify refactoring |
+| [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) | Disciplined coding principles |
+
+See [CREDITS.md](CREDITS.md) for full attribution details.
 
 ---
 
-**Made with ❤️ for the Claude Code community**
-
----
-
-*This plugin integrates [ccstatusline](https://github.com/sirmalloc/ccstatusline) by [@sirmalloc](https://github.com/sirmalloc), the [Sequential Thinking MCP](https://github.com/modelcontextprotocol/servers) by Anthropic, [Context7](https://github.com/upstash/context7) by Upstash, and [Superpowers](https://github.com/obra/superpowers-marketplace) by [@obra](https://github.com/obra). See [CREDITS.md](CREDITS.md) for full attribution.*
+*Built with ❤️ for the Claude Code community.*
+*Plugin code by [@anwarshariffa2z](https://github.com/anwarshariffa2z) — MIT licensed.*
