@@ -38,4 +38,21 @@ If you find an excellent MCP server or third-party plugin:
 
 ---
 
+## 📦 Releases & Packages
+
+We use GitHub Releases to mark stable versions of the Power Pack.
+
+### Creating a Release
+1. Ensure `setup.js` has the correct version number in the header.
+2. Go to the [Releases](https://github.com/anwarshariffa2z/claude-code-power-pack/releases) page.
+3. Click "Draft a new release".
+4. Choose a tag (e.g., `v2.2.0`) and target `master`.
+5. Use the "Generate release notes" button to summarize changes.
+6. Publish!
+
+### Packages
+Currently, the Power Pack is distributed via `git clone`. In the future, we may publish a companion helper via GitHub Packages (npm). If you are interested in helping with this, please open an issue!
+
+---
+
 *Build with ❤️ by the Claude Code community.*
