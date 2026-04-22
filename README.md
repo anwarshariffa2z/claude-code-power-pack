@@ -63,8 +63,8 @@ All plugins are fetched from their original authors' marketplaces — nothing is
 | Plugin | Author | What It Does |
 |--------|--------|-------------|
 | 🪨 [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) | Cuts ~75% of output tokens — same accuracy, way fewer words |
+| 🔧 [/simplify](https://docs.anthropic.com/en/docs/claude-code/overview) | Native | Built-in command — multi-agent refactoring pipeline |
 | ✨ [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | Structured planning and workflow methodology |
-| 🔧 [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | `/simplify` command — refactor messy code |
 | ☕ [double-shot-latte](https://github.com/obra/double-shot-latte) | [@obra](https://github.com/obra) | Zero-interruption mode — automatically continues working |
 | 🚀 [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | [@HKUDS](https://github.com/HKUDS) | "CLI over MCP" — 30x token savings via lean harnesses |
 | ✂️ [RTK](https://github.com/rtk-ai/rtk) | [@rtk-ai](https://github.com/rtk-ai) | Rust Token Killer — prune 60-90% of output noise |
@@ -188,7 +188,6 @@ This plugin integrates and automates setup for the following excellent community
 | [Context7 MCP](https://github.com/upstash/context7) | [Upstash](https://upstash.com) | MIT |
 | [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) (Julius Brussee) | MIT |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
-| [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
 | [double-shot-latte](https://github.com/obra/double-shot-latte) | [@obra](https://github.com/obra) (Jesse Vincent) | See repo |
 | [CLI-Anything](https://github.com/HKUDS/CLI-Anything) | [@HKUDS](https://github.com/HKUDS) | Apache-2.0 |
 | [RTK](https://github.com/rtk-ai/rtk) | [@rtk-ai](https://github.com/rtk-ai) | MIT |

@@ -85,12 +85,6 @@ const PLUGIN_MARKETPLACES = [
         credit: 'Jesse Vincent (@obra) — https://github.com/obra/superpowers-marketplace'
       },
       {
-        name: 'code-simplifier',
-        installCmd: 'claude plugin install code-simplifier@superpowers-marketplace',
-        description: 'Refactoring agent — /simplify command to clean up complex or messy code',
-        credit: 'Jesse Vincent (@obra) — https://github.com/obra/superpowers-marketplace'
-      },
-      {
         name: 'double-shot-latte',
         installCmd: 'claude plugin install double-shot-latte@superpowers-marketplace',
         description: '☕ Zero-interruption mode — automatically evaluates whether Claude should continue working',
@@ -407,7 +401,8 @@ function printSummary() {
   console.log(green('    ✔') + ' ccstatusline terminal HUD');
   console.log(green('    ✔') + ' Caveman — 75% token reduction (by @JuliusBrussee)');
   console.log(green('    ✔') + ' Superpowers — structured planning (by @obra)');
-  console.log(green('    ✔') + ' code-simplifier — /simplify refactor (by @obra)');
+  console.log(green('    ✔') + ' /simplify — built-in refactoring command (native)');
+  console.log(green('    ✔') + ' double-shot-latte — autonomous continue (by @obra)');
   console.log(green('    ✔') + ' Karpathy Skills — disciplined coding guidelines (by @forrestchang)');
   console.log(green('    ✔') + ' CLI-Anything discovery — lean agent harnesses (by @HKUDS)');
   console.log(green('    ✔') + ' RTK pruning — up to 90% token savings (by @rtk-ai)');

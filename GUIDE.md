@@ -66,7 +66,7 @@ node setup.js --register-hooks
 This single command:
 - Registers the Sequential Thinking and Context7 MCP servers
 - Configures the ccstatusline terminal HUD
-- Installs Caveman, Superpowers, code-simplifier, Karpathy Skills, and double-shot-latte from their official marketplaces
+- Installs Caveman, Superpowers, Karpathy Skills, and double-shot-latte from their official marketplaces
 - **Automatically registers hooks** in your project's `.claude/settings.json` (if `--register-hooks` is used)
 
 > [!NOTE]
@@ -274,9 +274,9 @@ Claude will walk through: problem framing → solution options → decision → 
 
 ---
 
-### 🔧 code-simplifier (Plugin — /simplify command)
+### 🔧 /simplify (Native Command)
 
-**What it does:** Analyzes your current code for unnecessary complexity — deeply nested conditionals, repeated patterns, unclear variable names — and refactors it cleanly without changing what it does.
+**What it does:** Analyzes your current code for unnecessary complexity — deeply nested conditionals, repeated patterns, unclear variable names — and refactors it cleanly without changing what it does. This is a built-in feature of Claude Code v2+.
 
 **How to use it:** At the end of a long coding session:
 ```
@@ -482,7 +482,7 @@ Opens an interactive TUI to pick themes, reorder widgets, change colors.
 ```
 "Delegate this to your opus-heavy agent."
 "Use the haiku-quick agent for this — it's a simple rename."
-"Run /simplify on this file before we continue."
+"Run the native /simplify command on this file."
 ```
 
 ---
@@ -566,7 +566,7 @@ This plugin integrates the following excellent community tools — all installed
 | [Context7](https://github.com/upstash/context7) | [Upstash](https://upstash.com) | Live library docs |
 | [Caveman](https://github.com/JuliusBrussee/caveman) | [@JuliusBrussee](https://github.com/JuliusBrussee) | 75% token reduction |
 | [Superpowers](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | Planning methodology |
-| [code-simplifier](https://github.com/obra/superpowers-marketplace) | [@obra](https://github.com/obra) | /simplify refactoring |
+| [/simplify](https://docs.anthropic.com/en/docs/claude-code/overview) | Native | Built-in refactoring command |
 | [Karpathy Skills](https://github.com/forrestchang/andrej-karpathy-skills) | [@forrestchang](https://github.com/forrestchang) | Disciplined coding principles |
 
 See [CREDITS.md](CREDITS.md) for full attribution details.

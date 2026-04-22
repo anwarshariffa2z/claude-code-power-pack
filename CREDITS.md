@@ -63,16 +63,6 @@ sources — no third-party code is bundled or redistributed here.
 
 ---
 
-### code-simplifier
-> Refactoring agent — the `/simplify` command for cleaning up complex code
-
-- **Author:** Jesse Vincent ([@obra](https://github.com/obra))
-- **Marketplace:** https://github.com/obra/superpowers-marketplace
-- **License:** See repository
-- **How we use it:** Installed via `claude plugin install code-simplifier@superpowers-marketplace`
-
----
-
 ### double-shot-latte
 > ☕ Zero-interruption mode — automatically evaluates whether Claude should continue working
 
