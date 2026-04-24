@@ -161,7 +161,7 @@ This plugin tracks token usage **after every single tool call** (not just every 
 
 ### 🛡️ Auto-Compaction Guard (Automatic)
 
-**What it does:** When estimated token usage crosses 50% (100,000 tokens), the plugin takes two actions:
+**What it does:** When estimated token usage crosses 80% (160,000 tokens), the plugin takes two actions:
 
 1. **Soft warning** — The next prompt you send includes a hidden directive telling Claude to warn you before doing more work.
 2. **Hard block** — The Stop hook fires with exit code 2, which forces Claude to deliver a message asking you to run `/compact` instead of continuing.
@@ -350,7 +350,7 @@ You: "Migrate the entire database layer to use Prisma ORM"
 2. Claude says: _"This is a complex migration — I'll delegate to my opus-heavy agent."_
 3. The **opus-heavy subagent** handles it in an isolated context window (not consuming your main context)
 4. You ask it to **think step by step**: Claude uses Sequential Thinking to map out: schema analysis → model generation → query migration → testing strategy
-5. After several large file reads, the **Context Tracker** warns at 50%: _"Context is getting full — run /compact before continuing"_
+5. After several large file reads, the **Context Tracker** warns at 80%: _"Context is getting full — run /compact before continuing"_
 6. You run `/compact`, Claude summarizes, and continues fresh
 
 ---
@@ -379,7 +379,7 @@ You've been working with Claude for 3 hours. The context is getting heavy.
 
 The **Stop Guard** fires:
 ```
-⚠️ Context usage: ~143,000 tokens (71% of 200K window)
+⚠️ Context usage: ~163,000 tokens (81% of 200K window)
 
 Before completing this response, I need to let you know our context 
 window is getting full. Here's what we've accomplished so far:

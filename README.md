@@ -131,9 +131,7 @@ Plugin
 
 ### Tuning the Context Threshold
 Edit `CONTEXT_THRESHOLD` in both `router.js` and `context-tracker.js`:
-```javascript
-const CONTEXT_THRESHOLD = 100000; // Default: 50% of 200K. Adjust as needed.
-```
+const CONTEXT_THRESHOLD = 160000; // Default: 80% of 200K. Adjust as needed.
 
 ### Tuning Model Scoring
 Edit the `SCORING` object in `router.js` to add/remove/reweight keywords for your workflow.
