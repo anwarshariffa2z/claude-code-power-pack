@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 const STATE_FILE = path.join(__dirname, 'state.json');
-const CONTEXT_THRESHOLD = 100000; // 50% of 200K window
+const CONTEXT_THRESHOLD = 160000; // 80% of 200K window — fires only when genuinely critical
 
 // ── Weighted Scoring Configuration ──────────────────────────────────────────
 
@@ -167,8 +167,14 @@ process.stdin.on('end', () => {
   state.turns += 1;
   state.lastModel = tier;
 
-  // Estimate tokens from the prompt itself (~4 chars per token)
-  state.estimatedTokens += Math.ceil(promptText.length / 4);
+  // Detect compaction command
+  if (promptLower.startsWith('/compact') || promptLower.includes('/reset-context')) {
+    state.estimatedTokens = 20000; // Reset to a base summary estimate
+    state.contextWarning = false;
+  } else {
+    // Estimate tokens from the prompt itself (~5 chars per token for code/text mix)
+    state.estimatedTokens += Math.ceil(promptText.length / 5);
+  }
 
   // Log the task
   const taskSummary = promptText.substring(0, 100).replace(/\n/g, ' ').trim();

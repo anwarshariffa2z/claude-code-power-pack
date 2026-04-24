@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const STATE_FILE = path.join(__dirname, 'state.json');
-const CONTEXT_THRESHOLD = 100000; // 50% of 200K window
+const CONTEXT_THRESHOLD = 160000; // 80% of 200K window — fires only when genuinely critical
 
 // Token estimation multipliers by tool type
 const TOOL_TOKEN_ESTIMATES = {
@@ -48,8 +48,8 @@ function estimateFromContent(data, multiplier = 1.0) {
   } else if (typeof data === 'string') {
     charCount = data.length;
   }
-  // ~4 characters per token, with multiplier
-  return Math.ceil((charCount / 4) * multiplier);
+  // ~5 characters per token, with multiplier (standard for code/prose mix)
+  return Math.ceil((charCount / 5) * multiplier);
 }
 
 function estimateFromOutput(data, multiplier = 1.0) {
@@ -66,7 +66,7 @@ function estimateFromOutput(data, multiplier = 1.0) {
   if (charCount === 0 && typeof data === 'string') {
     charCount = data.length;
   }
-  return Math.ceil((charCount / 4) * multiplier);
+  return Math.ceil((charCount / 5) * multiplier);
 }
 
 function estimateFromDiff(data) {
@@ -128,6 +128,9 @@ process.stdin.on('end', () => {
   } catch (e) {}
 
   state.estimatedTokens += tokenEstimate;
+
+  // Hard cap: estimator can never exceed the actual window size
+  if (state.estimatedTokens > 200000) state.estimatedTokens = 200000;
 
   // Check threshold
   const previousWarning = state.contextWarning;
