@@ -233,6 +233,10 @@ function setupStatusLine() {
 
   if (!fs.existsSync(settingsDir)) fs.mkdirSync(settingsDir, { recursive: true });
 
+  // Install ccstatusline globally
+  console.log(dim('  Installing ccstatusline via npm...'));
+  runCmd('npm install -g ccstatusline', 'Install ccstatusline globally');
+
   const existing = loadSettings(CLAUDE_SETTINGS_PATH);
   if (existing.statusLine) {
     console.log(green('  ✔ statusLine already configured — no changes needed'));
