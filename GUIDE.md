@@ -69,7 +69,7 @@ node setup.js --register-hooks
 
 This single command:
 - Registers the Sequential Thinking and Context7 MCP servers
-- Configures the ccstatusline terminal HUD
+- Installs `ccstatusline` globally via npm and configures the terminal HUD
 - Installs Caveman, Superpowers, Karpathy Skills, and double-shot-latte from their official marketplaces
 - **Automatically registers hooks** in your project's `.claude/settings.json` (if `--register-hooks` is used)
 

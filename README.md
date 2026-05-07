@@ -94,7 +94,7 @@ If you prefer manual control, copy the `agents/` and `hooks/` directories into y
 
 #### Automatic (ccstatusline)
 ```bash
-node setup.js           # Full setup — writes ccstatusline config to ~/.claude/settings.json
+node setup.js           # Full setup — installs ccstatusline globally via npm and writes config to ~/.claude/settings.json
 node setup.js --dry-run # Preview changes without writing
 ```
 
