@@ -1,0 +1,4 @@
+
+# Pages are content-hashed. A CRLF checkout changes every hash and refuses
+# every later read-modify-write for a mismatch no edit caused.
+wiki/** text eol=lf
