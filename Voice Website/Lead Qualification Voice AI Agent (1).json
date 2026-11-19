@@ -1,0 +1,425 @@
+{
+  "name": "Lead Qualification Voice AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        416
+      ],
+      "id": "24b8e9e2-2564-43a9-90c0-0c5d394c0778",
+      "name": "Webhook1",
+      "webhookId": "dbbff561-6f5c-4a17-a02e-ebdfa0068887"
+    },
+    {
+      "parameters": {
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "=Write a concise summary of the following:\n\n\n\"{{ $json.body.call.transcript }}\"\n\n\nCONCISE SUMMARY:",
+              "prompt": "=Write a concise summary of the following:\n\n\n\"{{ $json.body.call.transcript }}\"\n\n\nCONCISE SUMMARY:"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        416
+      ],
+      "id": "973bf968-aead-4017-9a3f-45c2606689aa",
+      "name": "Summarization Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        576
+      ],
+      "id": "e88a97b0-9e60-4fe2-9c4a-53fa32aa98b2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "zE5O89L0JjnRwfPU",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# STEP 2 - Update Lead Info\n\n",
+        "height": 400,
+        "width": 720,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        304
+      ],
+      "id": "ea69a63b-b97e-4499-95a1-d2cffbe69848",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# STEP 1 - Call Lead on Form Submission\n",
+        "height": 336,
+        "width": 724,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -64
+      ],
+      "id": "01a4be13-f5cf-4bf2-98f8-6b315b1fada6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\t\"from_number\": \"+15105183184\",\n\t\"to_number\": \"{{ $json.body.phone }}\",\n\t\"retell_llm_dynamic_variables\": {\n\t\t\"name\": \"{{ $json.body.fullName }}\",\n\t\t\"phone_number\": \"{{ $json.body.phone }}\",\n\t\t\"service\": \"{{ $json.body.serviceRequested }}\"\n\t  },\n\t\"override_agent_id\": \"agent_7a763a9325919acf768812b204\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        80
+      ],
+      "id": "11d0e6fc-2687-4402-b77e-f69bed873214",
+      "name": "Retell",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "JGdUtPEnSb6dAhxT",
+          "name": "Retell AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg",
+          "mode": "list",
+          "cachedResultName": "Lead qualification",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name ": "={{ $('Webhook').item.json.body.fullName }}",
+            "Phone ": "={{ $('Webhook').item.json.body.phone }}",
+            "Email ": "={{ $('Webhook').item.json.body.email }}",
+            "Service": "={{ $('Webhook').item.json.body.serviceRequested }}"
+          },
+          "matchingColumns": [
+            "Name "
+          ],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Phone Summary",
+              "displayName": "AI Phone Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -144,
+        80
+      ],
+      "id": "42d19955-6220-48c2-b7ce-ba9c921fcaae",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XNaB59lvp2qAwfit",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg",
+          "mode": "list",
+          "cachedResultName": "Lead qualification",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kqv2U6mmxsWhBgx01nqSqX9b5grcK5RqxlLSrFYeZhg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone ": "={{ $('Webhook1').item.json.body.call.retell_llm_dynamic_variables.phone_number }}",
+            "AI Phone Summary": "={{ $json.response.text }}"
+          },
+          "matchingColumns": [
+            "Phone "
+          ],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone ",
+              "displayName": "Phone ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Phone Summary",
+              "displayName": "AI Phone Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -80,
+        416
+      ],
+      "id": "9e3bb4e2-b137-4a7e-8f06-d9cb32515dad",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "XNaB59lvp2qAwfit",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gemini",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -560,
+        80
+      ],
+      "id": "b12d772b-848c-4d87-8299-5e6ed19e20c8",
+      "name": "Webhook",
+      "webhookId": "0028b8ad-3e5b-4d2e-bcd7-071ba58e9b64"
+    },
+    {
+      "parameters": {
+        "content": "# FREE Template ",
+        "height": 80,
+        "width": 288,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "65261daf-cb9c-4e87-85a1-0f21a0ac3aa2",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retell": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Retell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "68a423fe-2c7c-41ad-bbee-ea02f1f762da",
+  "meta": {
+    "instanceId": "5f99b345c3a4501a22438ba5962ff6685e5e97ee4bd0a17cc04a19ed072b5c2a"
+  },
+  "id": "vqOJ5erJI4RSqEsV",
+  "tags": []
+}

@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Brain & Autoresearch — Implementation Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #F6F5F1;
+  --card: #FFFFFF;
+  --text: #0C0E16;
+  --text-muted: #656872;
+  --text-faint: #9CA3AF;
+  --border: rgba(12,14,22,0.09);
+  --border-strong: rgba(12,14,22,0.16);
+
+  --p1: #4F36B0;
+  --p1-light: #EEEDFE;
+  --p1-mid: #CEC9F4;
+  --p2: #0A6B52;
+  --p2-light: #E0F4EE;
+  --p2-mid: #9EDECB;
+  --p3: #B07010;
+  --p3-light: #FAF0DC;
+  --p3-mid: #F5CC7D;
+
+  --code-bg: #0D1117;
+  --code-text: #CDD9E5;
+  --code-green: #7EE787;
+  --code-blue: #79C0FF;
+  --code-orange: #FFA657;
+  --code-comment: #768390;
+  --code-string: #A5D6FF;
+
+  --step-size: 2.2rem;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 900px; margin: 0 auto; padding: 0 28px 80px; }
+
+/* ── NAV ── */
+.toc-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(246,245,241,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 10px 0;
+  margin: 0 -28px 0;
+  padding-left: 28px;
+}
+.toc-nav ul { display: flex; gap: 4px; list-style: none; flex-wrap: wrap; }
+.toc-nav a {
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+  text-decoration: none; padding: 4px 10px; border-radius: 99px;
+  transition: all .15s;
+}
+.toc-nav a:hover { background: var(--card); color: var(--text); }
+.toc-nav .nav-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 5px; vertical-align: 1px;
+}
+
+/* ── HERO ── */
+.hero { padding: 56px 0 48px; border-bottom: 0.5px solid var(--border); margin-bottom: 48px; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 5vw, 52px); font-weight: 800;
+  color: var(--text); line-height: 1.1; margin-bottom: 14px;
+}
+.hero h1 span { color: var(--p1); }
+.hero-sub { font-size: 17px; color: var(--text-muted); max-width: 540px; margin-bottom: 36px; line-height: 1.6; }
+
+.tier-stack { display: flex; gap: 0; align-items: stretch; flex-wrap: wrap; }
+.tier-item {
+  flex: 1; min-width: 140px;
+  padding: 14px 16px;
+  border: 0.5px solid var(--border);
+  background: var(--card);
+  position: relative;
+}
+.tier-item:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.tier-item:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+.tier-item + .tier-item { border-left: none; }
+.tier-num { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.tier-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.tier-sub { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+.t1 .tier-num { color: var(--p1); }
+.t1 { border-top: 3px solid var(--p1); }
+.t2 .tier-num { color: var(--p2); }
+.t2 { border-top: 3px solid var(--p2); }
+.t3 .tier-num { color: #185FA5; }
+.t3 { border-top: 3px solid #185FA5; }
+.t4 .tier-num { color: var(--p3); }
+.t4 { border-top: 3px solid var(--p3); }
+
+/* ── PREREQS ── */
+.prereq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.prereq-card {
+  background: var(--card); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.prereq-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.prereq-card h4 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.prereq-card p { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+.prereq-card a { color: var(--p1); text-decoration: none; }
+.prereq-card a:hover { text-decoration: underline; }
+
+/* ── SECTIONS ── */
+.section { margin-bottom: 64px; }
+.section-header { margin-bottom: 28px; }
+.section-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 700; margin-bottom: 6px;
+}
+.section-header p { color: var(--text-muted); font-size: 15px; }
+
+/* ── PHASE HEADER ── */
+.phase-banner {
+  border-radius: var(--radius); padding: 24px 28px;
+  margin-bottom: 28px; display: flex; align-items: center; gap: 20px;
+}
+.phase-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 56px; font-weight: 800; line-height: 1; opacity: .18; flex-shrink: 0;
+}
+.phase-tag {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .07em; margin-bottom: 4px; opacity: .7;
+}
+.phase-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.phase-desc { font-size: 14px; opacity: .75; line-height: 1.5; }
+
+.ph1 .phase-banner { background: var(--p1-light); color: var(--p1); }
+.ph2 .phase-banner { background: var(--p2-light); color: var(--p2); }
+.ph3 .phase-banner { background: var(--p3-light); color: var(--p3); }
+
+/* ── STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step {
+  background: var(--card); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+}
+.step-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+.step-num {
+  width: var(--step-size); height: var(--step-size); min-width: var(--step-size);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+.ph1 .step-num { background: var(--p1-light); color: var(--p1); }
+.ph2 .step-num { background: var(--p2-light); color: var(--p2); }
+.ph3 .step-num { background: var(--p3-light); color: var(--p3); }
+
+.step-title { font-size: 15px; font-weight: 500; padding-top: 5px; }
+.step-body { margin-left: calc(var(--step-size) + 14px); }
+.step-body p { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; line-height: 1.6; }
+.step-body p:last-child { margin-bottom: 0; }
+
+/* ── CODE BLOCKS ── */
+.code-block { margin: 12px 0; border-radius: var(--radius); overflow: hidden; }
+.code-file {
+  background: #1A2030; color: #6B8096;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 7px 16px; border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; gap: 6px;
+}
+.code-file i { font-size: 13px; }
+pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 1.7;
+  padding: 16px 18px; overflow-x: auto;
+  margin: 0;
+}
+.cmd { color: var(--code-blue); }
+.str { color: var(--code-string); }
+.kw { color: var(--code-orange); }
+.cmt { color: var(--code-comment); font-style: italic; }
+.ok { color: var(--code-green); }
+.hl { background: rgba(121,192,255,.08); display: block; margin: 0 -18px; padding: 0 18px; }
+
+code {
+  font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+  background: rgba(12,14,22,0.07); border-radius: 4px;
+  padding: 1px 6px; color: var(--text);
+}
+
+/* ── CALLOUTS ── */
+.callout {
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  margin: 12px 0; font-size: 13px; line-height: 1.6;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.callout i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.callout-tip { background: var(--p2-light); border-left: 3px solid var(--p2); color: var(--p2); }
+.callout-info { background: #E6F1FB; border-left: 3px solid #185FA5; color: #185FA5; }
+.callout-warn { background: var(--p3-light); border-left: 3px solid var(--p3); color: var(--p3); }
+.callout p { color: var(--text); margin: 0; }
+.callout strong { font-weight: 500; }
+
+/* ── PROMPT BOX ── */
+.prompt-box {
+  background: #F0EEF9; border: 1px dashed var(--p1-mid);
+  border-radius: var(--radius); padding: 14px 18px; margin: 12px 0;
+}
+.prompt-label {
+  font-size: 10px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--p1); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.prompt-text { font-size: 13.5px; line-height: 1.65; color: var(--text); font-style: italic; }
+
+/* ── RESULT BOX ── */
+.result-box {
+  background: #F0FAF6; border: 0.5px solid var(--p2-mid);
+  border-radius: var(--radius); padding: 14px 18px; margin: 12px 0;
+}
+.result-label {
+  font-size: 10px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--p2); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.result-list { list-style: none; }
+.result-list li {
+  font-size: 13px; color: var(--text-muted); padding: 3px 0;
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+}
+.result-list li::before { content: "✓"; color: var(--p2); font-weight: 500; flex-shrink: 0; }
+
+/* ── FOLDER TREE ── */
+.tree {
+  background: var(--code-bg); border-radius: var(--radius);
+  padding: 14px 18px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px; line-height: 1.9; color: var(--code-text);
+}
+.tree .dir { color: var(--code-blue); font-weight: 500; }
+.tree .comment { color: var(--code-comment); }
+
+/* ── APPLICATIONS ── */
+.venture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.venture-card {
+  background: var(--card); border: 0.5px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px;
+}
+.vc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.vc-name { font-size: 14px; font-weight: 500; }
+.vc-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.badge {
+  font-size: 11px; padding: 3px 9px; border-radius: 99px;
+  font-weight: 500; white-space: nowrap; flex-shrink: 0;
+}
+.badge-now { background: #DCFCE7; color: #166534; }
+.badge-soon { background: var(--p3-light); color: var(--p3); }
+.badge-later { background: #F3F4F6; color: #6B7280; }
+.badge-meta { background: var(--p1-light); color: var(--p1); }
+.vc-item { font-size: 12.5px; color: var(--text-muted); padding: 3px 0; display: flex; gap: 7px; line-height: 1.5; }
+.vc-item i { font-size: 14px; flex-shrink: 0; margin-top: 2px; color: var(--text-faint); }
+.vc-divider { border: none; border-top: 0.5px solid var(--border); margin: 10px 0; }
+
+/* ── WORKFLOW TIMELINE ── */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-section { display: flex; gap: 0; }
+.tl-left {
+  width: 90px; min-width: 90px; text-align: right; padding-right: 20px;
+  padding-top: 4px;
+}
+.tl-period { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.tl-line-wrap { display: flex; flex-direction: column; align-items: center; }
+.tl-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--border-strong); background: var(--card);
+  flex-shrink: 0; margin-top: 5px;
+}
+.tl-dot.morning { border-color: #0A6B52; background: #0A6B52; }
+.tl-dot.work { border-color: #4F36B0; background: #4F36B0; }
+.tl-dot.evening { border-color: #B07010; background: #B07010; }
+.tl-dot.weekly { border-color: #185FA5; background: #185FA5; }
+.tl-line { width: 2px; background: var(--border); flex: 1; min-height: 16px; }
+.tl-content { flex: 1; padding: 0 0 24px 16px; }
+.tl-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; padding-top: 1px; }
+.tl-steps { list-style: none; }
+.tl-step { font-size: 13px; color: var(--text-muted); padding: 3px 0; display: flex; gap: 8px; line-height: 1.5; }
+.tl-step::before { content: "→"; flex-shrink: 0; }
+
+/* ── QUICK REFERENCE ── */
+.ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.ref-card {
+  background: var(--card); border: 0.5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.ref-head {
+  padding: 12px 16px; border-bottom: 0.5px solid var(--border);
+  font-size: 12px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.ref-rows { padding: 0 }
+.ref-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 16px; border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+}
+.ref-row:last-child { border-bottom: none; }
+.ref-row code { font-size: 11.5px; white-space: nowrap; }
+.ref-desc { color: var(--text-muted); line-height: 1.5; flex: 1; font-size: 12px; }
+
+/* ── UTILITIES ── */
+.mt-0 { margin-top: 0; }
+.mb-16 { margin-bottom: 16px; }
+.text-muted { color: var(--text-muted); }
+hr.divider { border: none; border-top: 0.5px solid var(--border); margin: 48px 0; }
+.inline-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 500; padding: 2px 8px;
+  border-radius: 99px; vertical-align: 2px;
+}
+.phase-pill-1 { background: var(--p1-light); color: var(--p1); }
+.phase-pill-2 { background: var(--p2-light); color: var(--p2); }
+.phase-pill-3 { background: var(--p3-light); color: var(--p3); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } .tier-stack { flex-direction: column; } .tier-item { border-left: 0.5px solid var(--border) !important; border-radius: 0 !important; } .tier-item:first-child { border-radius: var(--radius) var(--radius) 0 0 !important; } .tier-item:last-child { border-radius: 0 0 var(--radius) var(--radius) !important; } }
+
+@media print { .toc-nav { display: none; } body { background: white; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- NAV -->
+<nav class="toc-nav" aria-label="Table of contents">
+  <ul>
+    <li><a href="#overview"><span class="nav-dot" style="background:#0C0E16"></span>Overview</a></li>
+    <li><a href="#prereqs"><span class="nav-dot" style="background:#6B7280"></span>Prerequisites</a></li>
+    <li><a href="#phase1"><span class="nav-dot" style="background:#4F36B0"></span>Phase 1 · Memory</a></li>
+    <li><a href="#phase2"><span class="nav-dot" style="background:#0A6B52"></span>Phase 2 · Obsidian</a></li>
+    <li><a href="#phase3"><span class="nav-dot" style="background:#B07010"></span>Phase 3 · Autoresearch</a></li>
+    <li><a href="#applications"><span class="nav-dot" style="background:#185FA5"></span>Applications</a></li>
+    <li><a href="#workflow"><span class="nav-dot" style="background:#639922"></span>Daily Use</a></li>
+    <li><a href="#reference"><span class="nav-dot" style="background:#D4537E"></span>Reference</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="overview">
+  <div class="hero-eyebrow"><i class="ti ti-brain" aria-hidden="true"></i> Anwar Shariff · Portfolio OS</div>
+  <h1>Second Brain &<br><span>Autoresearch</span></h1>
+  <p class="hero-sub">A complete step-by-step guide to installing, configuring, and using your autonomous AI knowledge and optimization system across all six ventures.</p>
+
+  <div class="tier-stack">
+    <div class="tier-item t1">
+      <div class="tier-num">Tier 1</div>
+      <div class="tier-name">Knowledge</div>
+      <div class="tier-sub">Obsidian vault</div>
+    </div>
+    <div class="tier-item t2">
+      <div class="tier-num">Tier 2</div>
+      <div class="tier-name">Memory</div>
+      <div class="tier-sub">Memory compiler</div>
+    </div>
+    <div class="tier-item t3">
+      <div class="tier-num">Tier 3</div>
+      <div class="tier-name">Building</div>
+      <div class="tier-sub">Claude Code</div>
+    </div>
+    <div class="tier-item t4">
+      <div class="tier-num">Tier 4</div>
+      <div class="tier-name">Optimization</div>
+      <div class="tier-sub">Autoresearch</div>
+    </div>
+  </div>
+</header>
+
+<!-- PREREQUISITES -->
+<section class="section" id="prereqs">
+  <div class="section-header">
+    <h2>Before you start</h2>
+    <p>Five things to have ready. Each takes under 5 minutes to set up.</p>
+  </div>
+  <div class="prereq-grid">
+    <div class="prereq-card">
+      <div class="prereq-icon" style="background:#E6F1FB; color:#185FA5"><i class="ti ti-terminal-2" aria-hidden="true"></i></div>
+      <div>
+        <h4>Claude Code</h4>
+        <p>Already installed on your Windows machines. Run <code>claude --version</code> to confirm.</p>
+      </div>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-icon" style="background:#EEEDFE; color:#4F36B0"><i class="ti ti-brand-python" aria-hidden="true"></i></div>
+      <div>
+        <h4>Python + uv</h4>
+        <p>Open PowerShell and run <code>pip --version</code>. Install <code>uv</code> with the command in Step 1 below.</p>
+      </div>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-icon" style="background:#E0F4EE; color:#0A6B52"><i class="ti ti-notes" aria-hidden="true"></i></div>
+      <div>
+        <h4>Obsidian</h4>
+        <p>Free download at <a href="https://obsidian.md" target="_blank">obsidian.md</a>. Runs on Windows with no account needed.</p>
+      </div>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-icon" style="background:#F3F4F6; color:#374151"><i class="ti ti-brand-git" aria-hidden="true"></i></div>
+      <div>
+        <h4>Git + GitHub account</h4>
+        <p>Already set up for a2z-webapp. You'll use the same account for the knowledge vault.</p>
+      </div>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-icon" style="background:#FAF0DC; color:#B07010"><i class="ti ti-brand-nodejs" aria-hidden="true"></i></div>
+      <div>
+        <h4>Node.js</h4>
+        <p>For the autoresearch eval scripts. Run <code>node --version</code>. Should already be installed with a2z-webapp.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 1 -->
+<section class="section ph1" id="phase1">
+  <div class="phase-banner">
+    <div class="phase-num">01</div>
+    <div>
+      <div class="phase-tag">Phase 1 of 3</div>
+      <div class="phase-title">Code Memory — claude-memory-compiler</div>
+      <div class="phase-desc">Automatically captures every Claude Code session and builds a growing knowledge base that gets injected at the start of each new session.</div>
+    </div>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">Install uv (Python package manager)</div>
+      </div>
+      <div class="step-body">
+        <p>Open PowerShell on either Windows machine and run this once. uv is what the memory compiler uses to manage its dependencies.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-brand-windows" aria-hidden="true"></i> PowerShell</div>
+          <pre><span class="cmd">powershell</span> -ExecutionPolicy ByPass -c <span class="str">"irm https://astral.sh/uv/install.ps1 | iex"</span>
+
+<span class="cmt"># Verify it worked</span>
+<span class="cmd">uv</span> --version</pre>
+        </div>
+        <div class="callout callout-tip">
+          <i class="ti ti-check" aria-hidden="true"></i>
+          <p><strong>Repeat on both machines.</strong> Your home machine and office machine both need uv. Do this step on each one.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Open Claude Code in your a2z-webapp project</div>
+      </div>
+      <div class="step-body">
+        <p>Navigate to your a2z-webapp directory and open Claude Code. This is where the memory compiler will live — inside your main active project.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-terminal-2" aria-hidden="true"></i> Terminal</div>
+          <pre><span class="cmd">cd</span> C:\path\to\a2z-webapp
+<span class="cmd">claude</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">Tell Claude Code to install the memory compiler</div>
+      </div>
+      <div class="step-body">
+        <p>Type this prompt directly into Claude Code. Claude will clone the repo, install dependencies, and merge the session hooks into your project automatically.</p>
+        <div class="prompt-box">
+          <div class="prompt-label"><i class="ti ti-message" aria-hidden="true"></i> Say this to Claude Code</div>
+          <div class="prompt-text">Clone https://github.com/coleam00/claude-memory-compiler into this project. Set up the Claude Code hooks so my conversations automatically get captured into daily logs, compiled into a knowledge base, and injected back into future sessions. Read the AGENTS.md in the repo first for the full technical reference on how everything works. After setup, run uv sync to install dependencies.</div>
+        </div>
+        <p>Claude Code will handle everything: cloning, reading AGENTS.md, configuring <code>.claude/settings.json</code> hooks, and installing Python deps.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Verify the hooks are active</div>
+      </div>
+      <div class="step-body">
+        <p>Close Claude Code and reopen it. You should see hook activity in the session. Check that these files and folders were created:</p>
+        <div class="tree">
+<span class="dir">a2z-webapp/</span>
+├── <span class="dir">knowledge/</span>           <span class="comment">← created by memory compiler</span>
+│   ├── <span class="dir">daily/</span>            <span class="comment">← auto-generated session logs</span>
+│   ├── <span class="dir">concepts/</span>         <span class="comment">← compiled concept articles</span>
+│   └── index.md          <span class="comment">← master index (injected each session)</span>
+├── <span class="dir">scripts/</span>
+│   ├── flush.py          <span class="comment">← runs on session end</span>
+│   ├── compile.py        <span class="comment">← turns logs into articles</span>
+│   └── query.py          <span class="comment">← search the knowledge base</span>
+└── <span class="dir">.claude/</span>
+    └── settings.json     <span class="comment">← hooks configured here</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">Run the three core scripts manually</div>
+      </div>
+      <div class="step-body">
+        <p>These run automatically via hooks, but you can also trigger them manually. Know these commands — you'll use them often.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-terminal-2" aria-hidden="true"></i> Terminal — from a2z-webapp root</div>
+          <pre><span class="cmt"># Compile today's session logs into concept articles</span>
+<span class="cmd">uv run python</span> scripts/compile.py
+
+<span class="cmt"># Search the knowledge base with a question</span>
+<span class="cmd">uv run python</span> scripts/query.py <span class="str">"how does supplier discovery work?"</span>
+
+<span class="cmt"># Run health checks (broken links, orphans, staleness)</span>
+<span class="cmd">uv run python</span> scripts/lint.py</pre>
+        </div>
+        <div class="callout callout-info">
+          <i class="ti ti-info-circle" aria-hidden="true"></i>
+          <p><strong>After 6 PM, compilation runs automatically.</strong> Every morning when you open Claude Code, the full knowledge index is injected into the session. You don't need to do anything.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">Sync to your second machine</div>
+      </div>
+      <div class="step-body">
+        <p>The <code>knowledge/</code> folder is just markdown files. Commit it like the rest of the codebase and pull it on your second machine.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-brand-git" aria-hidden="true"></i> Git</div>
+          <pre><span class="cmd">git add</span> knowledge/ scripts/ .claude/
+<span class="cmd">git commit</span> -m <span class="str">"add: memory compiler setup"</span>
+<span class="cmd">git push</span> origin dev
+
+<span class="cmt"># On your second machine:</span>
+<span class="cmd">git pull</span> origin dev
+<span class="cmd">uv sync</span>    <span class="cmt"># install deps</span></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="result-box" style="margin-top: 20px;">
+    <div class="result-label"><i class="ti ti-check" aria-hidden="true"></i> What you have after Phase 1</div>
+    <ul class="result-list">
+      <li>Every Claude Code session is silently captured and compiled overnight</li>
+      <li>Knowledge base grows with every session — Supabase patterns, Gemini quirks, architecture decisions</li>
+      <li>Next session starts with full context of everything you've built and learned</li>
+      <li>Works identically on both Windows machines via git sync</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 2 -->
+<section class="section ph2" id="phase2">
+  <div class="phase-banner">
+    <div class="phase-num">02</div>
+    <div>
+      <div class="phase-tag">Phase 2 of 3</div>
+      <div class="phase-title">Business Knowledge — Obsidian Vault</div>
+      <div class="phase-desc">Your external knowledge base. Industry research, ISO docs, GST rulings, client communication patterns, competitor intel — organized and maintained by Claude, not you.</div>
+    </div>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">Install Obsidian and the Web Clipper</div>
+      </div>
+      <div class="step-body">
+        <p>Two downloads. Both free. Do both before continuing.</p>
+        <div class="two-col">
+          <div class="callout callout-info" style="margin:0">
+            <i class="ti ti-app-window" aria-hidden="true"></i>
+            <div>
+              <p><strong>Obsidian desktop app</strong><br>Download from <a href="https://obsidian.md" target="_blank" style="color:#185FA5">obsidian.md</a>. Windows installer. No account required.</p>
+            </div>
+          </div>
+          <div class="callout callout-info" style="margin:0">
+            <i class="ti ti-puzzle" aria-hidden="true"></i>
+            <div>
+              <p><strong>Obsidian Web Clipper</strong><br>Install browser extension from <a href="https://obsidian.md/clipper" target="_blank" style="color:#185FA5">obsidian.md/clipper</a>. Works in Chrome, Edge, Firefox.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Create the vault folder structure</div>
+      </div>
+      <div class="step-body">
+        <p>Create this folder anywhere on your Windows machine — Documents is fine. This becomes your Obsidian vault.</p>
+        <div class="tree">
+<span class="dir">C:\Users\Anwar\Documents\anwar-brain\</span>
+├── <span class="dir">raw\</span>              <span class="comment">← source documents, NEVER modify</span>
+│   ├── <span class="dir">articles\</span>     <span class="comment">← web clips, saved pages</span>
+│   ├── <span class="dir">regulations\</span>  <span class="comment">← GST, ISO, Incoterms docs</span>
+│   ├── <span class="dir">competitors\</span>  <span class="comment">← market intelligence</span>
+│   └── <span class="dir">assets\</span>       <span class="comment">← images, PDFs</span>
+└── <span class="dir">wiki\</span>             <span class="comment">← Claude writes this, you read it</span>
+    ├── <span class="dir">a2z\</span>
+    ├── <span class="dir">dealclues\</span>
+    ├── <span class="dir">bridgemail\</span>
+    ├── <span class="dir">smm\</span>
+    ├── <span class="dir">perfume\</span>
+    ├── <span class="dir">saas-brain\</span>
+    ├── index.md          <span class="comment">← master catalog</span>
+    └── log.md            <span class="comment">← append-only activity log</span>
+        </div>
+        <p>Open Obsidian → <strong>Create New Vault</strong> → point it to <code>anwar-brain\</code></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">Configure Obsidian settings</div>
+      </div>
+      <div class="step-body">
+        <p>Three settings to change before anything else:</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-settings" aria-hidden="true"></i> Obsidian Settings</div>
+          <pre><span class="cmt">Settings → Files and Links</span>
+  Attachment folder path:  <span class="str">raw/assets</span>
+  New note folder:         <span class="str">wiki</span>
+
+<span class="cmt">Settings → Hotkeys</span>
+  Search "Download attachments" → bind  <span class="ok">Ctrl+Shift+D</span>
+
+<span class="cmt">Community Plugins → Browse → Install:</span>
+  Obsidian Git  <span class="cmt">(auto git sync)</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Create your CLAUDE.md schema file</div>
+      </div>
+      <div class="step-body">
+        <p>This is the most important file in the vault. It tells Claude Code exactly how to maintain your wiki. Create it at <code>anwar-brain/CLAUDE.md</code>.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-file-text" aria-hidden="true"></i> anwar-brain/CLAUDE.md</div>
+          <pre><span class="kw"># A2Z Knowledge Base — Anwar's Second Brain</span>
+
+<span class="cmt">## Project structure</span>
+<span class="ok">raw/</span>   → Immutable source documents. NEVER modify these.
+<span class="ok">wiki/</span>  → You own this entirely. All generated content goes here.
+<span class="ok">wiki/index.md</span>  → Master catalog. Update on every ingest.
+<span class="ok">wiki/log.md</span>    → Append-only activity log.
+
+<span class="cmt">## Page format — every wiki page MUST have YAML frontmatter</span>
+---
+title: Page Title
+type: concept | entity | comparison | procedure | source-summary
+sources: [list of raw/ files referenced]
+related: [list of wiki/ pages linked]
+confidence: high | medium | low
+updated: YYYY-MM-DD
+---
+
+<span class="cmt">## When I say "ingest [filename]"</span>
+1. Read the source file in raw/
+2. Find any contradictions with existing wiki pages
+3. Create/update wiki/[project]/[topic].md
+4. Update wiki/index.md with new entry
+5. Append to wiki/log.md
+6. Update all related wiki pages with cross-links
+
+<span class="cmt">## Domain context</span>
+A2Z Ship Stores Pvt. Ltd. — ship chandler, Chennai, India.
+Ports: Chennai, Cochin, Colombo, UAE.
+Certs: IMPA, ISO, ShipServ, Halal.
+Other ventures: dealclues.in, bridgemail.in, SMM agency,
+perfume brand, second brain SaaS.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">Set up git for vault sync across machines</div>
+      </div>
+      <div class="step-body">
+        <p>Create a private GitHub repo (separate from a2z-webapp) and push the vault to it.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-brand-git" aria-hidden="true"></i> Terminal — from anwar-brain folder</div>
+          <pre><span class="cmd">git init</span>
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m <span class="str">"initial vault setup"</span>
+<span class="cmd">git remote add origin</span> https://github.com/anwarshariffa2z/anwar-brain.git
+<span class="cmd">git push</span> -u origin main
+
+<span class="cmt"># On second machine — clone it</span>
+<span class="cmd">git clone</span> https://github.com/anwarshariffa2z/anwar-brain.git</pre>
+        </div>
+        <div class="callout callout-warn">
+          <i class="ti ti-shield-lock" aria-hidden="true"></i>
+          <p><strong>Make this repo private.</strong> It will contain business intelligence, client patterns, and proprietary knowledge. Private repo = free on GitHub.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">Ingest your first document</div>
+      </div>
+      <div class="step-body">
+        <p>Start with something you already have — one of your ISO scope documents, a GST ruling PDF, or an IMPA reference guide. Drop it into <code>raw/regulations/</code>, then open Claude Code pointed at the vault root.</p>
+        <div class="prompt-box">
+          <div class="prompt-label"><i class="ti ti-message" aria-hidden="true"></i> Say this to Claude Code</div>
+          <div class="prompt-text">Read CLAUDE.md to understand the vault schema. Then ingest raw/regulations/[your-filename].pdf — create all necessary wiki pages, update index.md and log.md, and link to any existing related pages.</div>
+        </div>
+        <p>Watch the wiki populate in Obsidian in real time.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="result-box" style="margin-top: 20px;">
+    <div class="result-label"><i class="ti ti-check" aria-hidden="true"></i> What you have after Phase 2</div>
+    <ul class="result-list">
+      <li>A growing, structured knowledge base for all 6 ventures in one place</li>
+      <li>Any article you clip goes into raw/ — Claude builds the wiki page automatically</li>
+      <li>Cross-referenced wiki: one page links to every related page</li>
+      <li>Synced via git between home and office machine</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 3 -->
+<section class="section ph3" id="phase3">
+  <div class="phase-banner">
+    <div class="phase-num">03</div>
+    <div>
+      <div class="phase-tag">Phase 3 of 3</div>
+      <div class="phase-title">Autonomous Optimization — Autoresearch</div>
+      <div class="phase-desc">The Karpathy Loop. An agent modifies one target file, runs your eval script, keeps improvements, discards failures, and repeats — overnight, without stopping.</div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn" style="margin-bottom:20px">
+    <i class="ti ti-cpu" aria-hidden="true"></i>
+    <p><strong>No GPU required.</strong> The karpathy/autoresearch repo is for ML training. You're using the <em>pattern</em> — not the repo — applied to content templates, algorithms, and prompts. Claude Code is your agent.</p>
+  </div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">Understand the three-file pattern</div>
+      </div>
+      <div class="step-body">
+        <p>Every autoresearch loop has exactly three components. This is all you need to set up.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-layout-grid" aria-hidden="true"></i> The three files</div>
+          <pre><span class="ok">program.md</span>     <span class="cmt">← YOU write this: goal, constraints, loop instructions</span>
+<span class="ok">[target file]</span>  <span class="cmt">← AGENT modifies this: your template, algorithm, or prompt</span>
+<span class="ok">eval/score.js</span>  <span class="cmt">← LOCKED: generates outputs + scores with yes/no questions</span></pre>
+        </div>
+        <p>The agent reads <code>program.md</code>, modifies the target file, runs <code>eval/score.js</code>, commits if score improved, resets if not, and loops forever.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Create the autoresearch folder structure</div>
+      </div>
+      <div class="step-body">
+        <p>Create this folder in your a2z-webapp project (or a dedicated repo for business content).</p>
+        <div class="tree">
+<span class="dir">autoresearch/</span>
+├── <span class="dir">smm-hooks/</span>           <span class="comment">← first loop: Instagram content</span>
+│   ├── program.md
+│   ├── results.tsv          <span class="comment">← auto-populated, not in git</span>
+│   ├── <span class="dir">target/</span>
+│   │   └── hooks.md         <span class="comment">← the file the agent edits</span>
+│   └── <span class="dir">eval/</span>
+│       └── score.js         <span class="comment">← locked, agent cannot touch</span>
+├── <span class="dir">email-subjects/</span>      <span class="comment">← bridgemail templates</span>
+└── <span class="dir">supplier-matching/</span>   <span class="comment">← a2z-webapp algorithm</span>
+        </div>
+        <div class="callout callout-tip">
+          <i class="ti ti-check" aria-hidden="true"></i>
+          <p><strong>Add results.tsv to .gitignore.</strong> This file tracks experiment scores and gets updated constantly. Don't commit it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">Write your first program.md (SMM hooks)</div>
+      </div>
+      <div class="step-body">
+        <p>This is the human's job — writing the loop instructions. The agent reads this file and knows exactly what to do. Copy this template to <code>autoresearch/smm-hooks/program.md</code>.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-file-text" aria-hidden="true"></i> autoresearch/smm-hooks/program.md</div>
+          <pre><span class="kw"># Autoresearch — SMM Instagram Hooks</span>
+
+<span class="cmt">## Goal</span>
+Improve hook templates in <span class="ok">target/hooks.md</span>.
+Metric: <span class="ok">hook_score</span> (percentage of yes answers — higher is better).
+
+<span class="cmt">## Setup</span>
+1. Create branch: <span class="cmd">git checkout -b</span> autoresearch/smm-hooks-[date]
+2. Read target/hooks.md — this is the ONLY file you may modify.
+3. Record baseline score after the first run.
+
+<span class="cmt">## Eval</span>
+Run: <span class="cmd">node eval/score.js</span>
+Parse output: look for <span class="str">"hook_score: XX.XX"</span>
+Baseline is recorded on the first run.
+
+<span class="cmt">## What you CAN change</span>
+- Hook patterns and formulas in target/hooks.md
+- Variable placeholder conventions ({{brand}}, {{benefit}}, etc.)
+- Pattern categories and organization structure
+
+<span class="cmt">## What you CANNOT change</span>
+- eval/score.js — this is the locked evaluation harness
+- eval/questions.json — the binary scoring criteria
+- Any file outside the autoresearch/smm-hooks/ folder
+
+<span class="cmt">## Experiment loop</span>
+LOOP FOREVER:
+1. Read current hooks.md state
+2. Propose ONE improvement hypothesis
+3. Modify hooks.md
+4. git commit with a short description
+5. Run: node eval/score.js > run.log
+6. Read hook_score from run.log
+7. If score improved: keep the commit, advance
+8. If score equal or worse: git reset --hard HEAD~1
+9. Append result to results.tsv
+10. DO NOT stop. DO NOT ask for confirmation. Loop until score &gt;= 90 or interrupted.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Write the eval script (locked evaluation harness)</div>
+      </div>
+      <div class="step-body">
+        <p>Create <code>autoresearch/smm-hooks/eval/score.js</code>. This is the scoring script. The agent can never modify it — it's the ground truth.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-brand-javascript" aria-hidden="true"></i> eval/score.js</div>
+          <pre><span class="kw">import</span> Anthropic <span class="kw">from</span> <span class="str">'@anthropic-ai/sdk'</span>;
+<span class="kw">import</span> fs <span class="kw">from</span> <span class="str">'fs'</span>;
+
+<span class="kw">const</span> QUESTIONS = [
+  <span class="str">"Does the hook create a pattern interrupt in the first 3 words? YES or NO only."</span>,
+  <span class="str">"Does it avoid starting with 'I' or the brand name? YES or NO only."</span>,
+  <span class="str">"Is it under 15 words? YES or NO only."</span>,
+  <span class="str">"Does it imply a clear benefit or transformation? YES or NO only."</span>,
+  <span class="str">"Is it specific enough a competitor couldn't use it unchanged? YES or NO only."</span>
+];
+
+<span class="kw">async function</span> <span class="cmd">score</span>() {
+  <span class="kw">const</span> client = <span class="kw">new</span> Anthropic();
+  <span class="kw">const</span> templates = fs.readFileSync(<span class="str">'target/hooks.md'</span>, <span class="str">'utf-8'</span>);
+
+  <span class="cmt">// Generate 20 hooks from current templates</span>
+  <span class="kw">const</span> gen = <span class="kw">await</span> client.messages.create({
+    model: <span class="str">'claude-sonnet-4-20250514'</span>, max_tokens: 800,
+    messages: [{ role: <span class="str">'user'</span>, content:
+      <span class="str">`Using these templates:\n${templates}\n\nGenerate 20 Instagram hooks. One per line.`</span> }]
+  });
+
+  <span class="kw">const</span> hooks = gen.content[0].text.split(<span class="str">'\n'</span>).filter(h =&gt; h.trim()).slice(0, 20);
+  <span class="kw">let</span> yes = 0, total = hooks.length * QUESTIONS.length;
+
+  <span class="kw">for</span> (<span class="kw">const</span> hook <span class="kw">of</span> hooks) {
+    <span class="kw">for</span> (<span class="kw">const</span> q <span class="kw">of</span> QUESTIONS) {
+      <span class="kw">const</span> r = <span class="kw">await</span> client.messages.create({
+        model: <span class="str">'claude-sonnet-4-20250514'</span>, max_tokens: 5,
+        messages: [{ role: <span class="str">'user'</span>, content: <span class="str">`Hook: "${hook}"\n\n${q}`</span> }]
+      });
+      <span class="kw">if</span> (r.content[0].text.trim().startsWith(<span class="str">'YES'</span>)) yes++;
+    }
+  }
+
+  <span class="kw">const</span> score = ((yes / total) * 100).toFixed(2);
+  console.log(<span class="str">`hook_score: ${score}`</span>);
+}
+
+<span class="cmd">score</span>();</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">Start the loop — go to sleep</div>
+      </div>
+      <div class="step-body">
+        <p>Open Claude Code in the a2z-webapp directory (or wherever autoresearch lives) on an evening when you won't need your computer. Then say this:</p>
+        <div class="prompt-box">
+          <div class="prompt-label"><i class="ti ti-message" aria-hidden="true"></i> Say this to Claude Code (evening)</div>
+          <div class="prompt-text">Read autoresearch/smm-hooks/program.md carefully. Set up on a new branch called autoresearch/smm-hooks-[today's date], run the baseline first, then begin the optimization loop. Do not stop unless hook_score reaches 90 or I manually interrupt you. Remember: NEVER ask for confirmation, NEVER pause — loop indefinitely.</div>
+        </div>
+        <p>Close your laptop. Go to sleep. Come back in the morning.</p>
+        <div class="code-block">
+          <div class="code-file"><i class="ti ti-sun" aria-hidden="true"></i> Morning — check what happened</div>
+          <pre><span class="cmt"># See all experiments that ran overnight</span>
+<span class="cmd">git log</span> autoresearch/smm-hooks-[date] --oneline
+
+<span class="cmt"># See score progression</span>
+<span class="cmd">cat</span> autoresearch/smm-hooks/results.tsv
+
+<span class="cmt"># If happy, merge the improvements</span>
+<span class="cmd">git checkout</span> main
+<span class="cmd">git merge</span> autoresearch/smm-hooks-[date]</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="result-box" style="margin-top:20px">
+    <div class="result-label"><i class="ti ti-check" aria-hidden="true"></i> What you have after Phase 3</div>
+    <ul class="result-list">
+      <li>An autonomous optimization loop you can run overnight for any target with a measurable metric</li>
+      <li>SMM hook templates that compound in quality over weeks with zero manual effort</li>
+      <li>Results automatically captured by the memory compiler (Phase 1) — next session knows what was optimized</li>
+      <li>Reusable eval harness you can clone for email subjects, product descriptions, algorithms</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- APPLICATIONS -->
+<section class="section" id="applications">
+  <div class="section-header">
+    <h2>Your 6 ventures — where each system applies</h2>
+    <p>Which tier helps each venture, what it optimizes, and when you can start.</p>
+  </div>
+
+  <div class="venture-grid">
+    <div class="venture-card">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-anchor" aria-hidden="true"></i> A2Z Ship Stores</div><div class="vc-sub">Marine chandlery · revenue engine</div></div>
+        <span class="badge badge-now">Use now</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#4F36B0" aria-hidden="true"></i><span><strong>Memory (P1):</strong> captures IMPA patterns, GST flows, client comms</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#0A6B52" aria-hidden="true"></i><span><strong>Obsidian (P2):</strong> ISO docs, port procedures, Incoterms wiki</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> vessel quote templates, today</span></div>
+    </div>
+
+    <div class="venture-card">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-brand-instagram" aria-hidden="true"></i> SMM Agency</div><div class="vc-sub">AI-powered social media marketing</div></div>
+        <span class="badge badge-now">Start today</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#0A6B52" aria-hidden="true"></i><span><strong>Obsidian (P2):</strong> client knowledge, platform trends, content strategies</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> hooks, captions, CTAs — highest ROI loop in your portfolio</span></div>
+    </div>
+
+    <div class="venture-card">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-mail" aria-hidden="true"></i> bridgemail.in</div><div class="vc-sub">Email platform · MVP in dev</div></div>
+        <span class="badge badge-soon">When MVP is live</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#4F36B0" aria-hidden="true"></i><span><strong>Memory (P1):</strong> captures deliverability patterns, SDK quirks</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> subject line optimizer — potentially a product feature you sell</span></div>
+    </div>
+
+    <div class="venture-card">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-tag" aria-hidden="true"></i> dealclues.in</div><div class="vc-sub">Deals platform · MVP in dev</div></div>
+        <span class="badge badge-soon">When MVP is live</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#4F36B0" aria-hidden="true"></i><span><strong>Memory (P1):</strong> captures ranking logic, affiliate patterns, data models</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> deal ranking algorithm, CTR optimization</span></div>
+    </div>
+
+    <div class="venture-card">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-droplet" aria-hidden="true"></i> Perfume Co.</div><div class="vc-sub">Consumer fragrance brand</div></div>
+        <span class="badge badge-later">Phase 3 — later</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#0A6B52" aria-hidden="true"></i><span><strong>Obsidian (P2):</strong> fragrance industry intel, sourcing notes, brand positioning</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> product description quality, when brand launches</span></div>
+    </div>
+
+    <div class="venture-card" style="border-color: var(--p1-mid)">
+      <div class="vc-head">
+        <div><div class="vc-name"><i class="ti ti-brain" aria-hidden="true"></i> Second Brain SaaS</div><div class="vc-sub">White-label + SaaS + done-for-you</div></div>
+        <span class="badge badge-meta">★ Meta-business</span>
+      </div>
+      <hr class="vc-divider">
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#4F36B0" aria-hidden="true"></i><span><strong>You ARE the use case.</strong> All 3 phases are your demo and validation.</span></div>
+      <div class="vc-item"><i class="ti ti-circle-filled" style="color:#B07010" aria-hidden="true"></i><span><strong>Autoresearch:</strong> optimize wiki ingestion prompts — the meta-loop that improves the brain itself</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DAILY WORKFLOW -->
+<section class="section" id="workflow">
+  <div class="section-header">
+    <h2>Daily usage workflow</h2>
+    <p>What a typical day looks like once all three phases are running.</p>
+  </div>
+
+  <div class="timeline">
+
+    <div class="tl-section">
+      <div class="tl-left"><div class="tl-period">Morning</div></div>
+      <div class="tl-line-wrap"><div class="tl-dot morning"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title" style="color:#0A6B52">Start your session</div>
+        <ul class="tl-steps">
+          <li class="tl-step">Open Claude Code — session start hook auto-injects yesterday's compiled knowledge index</li>
+          <li class="tl-step">Run <code>claude --continue</code> to resume from where last session ended</li>
+          <li class="tl-step">If autoresearch ran overnight: <code>git log autoresearch/[target] --oneline</code> and check <code>results.tsv</code></li>
+          <li class="tl-step">If results are good: <code>git merge</code> the improvements into main</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-section">
+      <div class="tl-left"><div class="tl-period">During work</div></div>
+      <div class="tl-line-wrap"><div class="tl-dot work"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title" style="color:#4F36B0">Code and build normally</div>
+        <ul class="tl-steps">
+          <li class="tl-step">Code as normal — memory compiler captures everything silently in the background</li>
+          <li class="tl-step">When you find a useful article: click Web Clipper → save to <code>raw/articles/</code></li>
+          <li class="tl-step">When completing a major feature: run <code>/handover</code> to create an explicit snapshot</li>
+          <li class="tl-step">To ingest a new article: open Claude Code in vault root, say <code>ingest raw/articles/[file].md</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-section">
+      <div class="tl-left"><div class="tl-period">Evening</div></div>
+      <div class="tl-line-wrap"><div class="tl-dot evening"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title" style="color:#B07010">Launch an autoresearch loop (optional)</div>
+        <ul class="tl-steps">
+          <li class="tl-step">Pick one optimization target for tonight (hooks, subjects, algorithm, etc.)</li>
+          <li class="tl-step">Open Claude Code, say: <em>"Read autoresearch/[target]/program.md and start the loop. Do not stop."</em></li>
+          <li class="tl-step">Leave Claude Code running. Go to sleep. Agent runs 50–100 experiments overnight.</li>
+          <li class="tl-step">Morning: check results, merge if good</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tl-section">
+      <div class="tl-left"><div class="tl-period">Weekly</div></div>
+      <div class="tl-line-wrap"><div class="tl-dot weekly"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-title" style="color:#185FA5">Maintenance (15 minutes)</div>
+        <ul class="tl-steps">
+          <li class="tl-step">Run <code>uv run python scripts/lint.py</code> — knowledge base health check</li>
+          <li class="tl-step">Batch-ingest any articles saved during the week into the Obsidian vault</li>
+          <li class="tl-step">Git sync both machines: <code>git add . && git commit -m "weekly sync" && git push</code></li>
+          <li class="tl-step">Review top knowledge base entries — anything to update or correct?</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- QUICK REFERENCE -->
+<section class="section" id="reference">
+  <div class="section-header">
+    <h2>Quick reference</h2>
+    <p>Every command you'll use regularly, in one place.</p>
+  </div>
+
+  <div class="ref-grid">
+
+    <div class="ref-card">
+      <div class="ref-head" style="color: var(--p1)"><i class="ti ti-cpu" aria-hidden="true"></i> Memory compiler</div>
+      <div class="ref-rows">
+        <div class="ref-row"><code>uv run python scripts/compile.py</code><span class="ref-desc">Compile today's logs into concept articles</span></div>
+        <div class="ref-row"><code>uv run python scripts/query.py "question"</code><span class="ref-desc">Ask the knowledge base a question</span></div>
+        <div class="ref-row"><code>uv run python scripts/lint.py</code><span class="ref-desc">Run 7 health checks on the knowledge base</span></div>
+        <div class="ref-row"><code>claude --continue</code><span class="ref-desc">Resume last session with full context</span></div>
+        <div class="ref-row"><code>/handover</code><span class="ref-desc">Generate HANDOVER.md + todo + lessons snapshot</span></div>
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-head" style="color: var(--p2)"><i class="ti ti-notes" aria-hidden="true"></i> Obsidian vault</div>
+      <div class="ref-rows">
+        <div class="ref-row"><code>ingest raw/[file]</code><span class="ref-desc">Tell Claude Code to build wiki pages from a source file</span></div>
+        <div class="ref-row"><code>lint the wiki</code><span class="ref-desc">Check for broken links, orphan pages, contradictions</span></div>
+        <div class="ref-row"><code>query the wiki: [question]</code><span class="ref-desc">Search the knowledge base via Claude Code</span></div>
+        <div class="ref-row"><code>git pull && git push</code><span class="ref-desc">Sync vault between home and office machines</span></div>
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-head" style="color: var(--p3)"><i class="ti ti-refresh" aria-hidden="true"></i> Autoresearch</div>
+      <div class="ref-rows">
+        <div class="ref-row"><code>node eval/score.js</code><span class="ref-desc">Run eval manually — see current baseline score</span></div>
+        <div class="ref-row"><code>git log [branch] --oneline</code><span class="ref-desc">See all experiments the agent ran overnight</span></div>
+        <div class="ref-row"><code>cat results.tsv</code><span class="ref-desc">See score progression across all experiments</span></div>
+        <div class="ref-row"><code>git reset --hard HEAD~1</code><span class="ref-desc">Undo last experiment if needed</span></div>
+        <div class="ref-row"><code>git merge [branch]</code><span class="ref-desc">Merge overnight improvements into main</span></div>
+      </div>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-head"><i class="ti ti-brand-git" aria-hidden="true"></i> Machine sync (both machines)</div>
+      <div class="ref-rows">
+        <div class="ref-row"><code>git pull origin dev</code><span class="ref-desc">Pull latest before starting work</span></div>
+        <div class="ref-row"><code>git add . && git commit -m "sync"</code><span class="ref-desc">Commit all changes</span></div>
+        <div class="ref-row"><code>git push origin dev</code><span class="ref-desc">Push to share with second machine</span></div>
+        <div class="ref-row"><code>robocopy [src] [dst] /MIR</code><span class="ref-desc">HDD backup (your existing robocopy script)</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div style="margin-top: 64px; padding-top: 24px; border-top: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+  <div style="font-size: 13px; color: var(--text-faint)">Second Brain & Autoresearch Implementation Guide · Anwar Shariff · May 2026</div>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <span class="inline-badge phase-pill-1">Phase 1: Memory</span>
+    <span class="inline-badge phase-pill-2">Phase 2: Obsidian</span>
+    <span class="inline-badge phase-pill-3">Phase 3: Autoresearch</span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
